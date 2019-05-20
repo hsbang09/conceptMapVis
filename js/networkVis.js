@@ -1,4 +1,8 @@
 
+var seed = 392258;
+// var seed = undefined;
+
+
 var data = null;
 var network = null;
 var nodes = null;
@@ -46,6 +50,9 @@ $.getJSON("visData/ClimateCentric-4.json", (d) => {
     var container = document.getElementById('networkContainer');
 
     var options = {
+            layout: {
+                randomSeed: seed,
+            },
             edges:{
                 color: {
                     color: '#848484',
@@ -97,6 +104,8 @@ $.getJSON("visData/ClimateCentric-4.json", (d) => {
         contextMenu.showMenu(e, edgeID);
         e.preventDefault()
     }, false);
+
+    setAddEdgeMode(false);
 });
 
 function objectToArray(obj) {
@@ -107,7 +116,6 @@ function objectToArray(obj) {
 }
 
 function editEdge(data, callback){
-
     var addingNewEdge = true;
     var initialWeight = null;
     var initialConnectionType = null;
@@ -211,22 +219,55 @@ function editEdge(data, callback){
                     data.color = { color: '#FF2222',
                                     highlight: '#FF2222'};
                 }
-                data.width = ((weight / 100) * 6) + 1; // max: 8, min: 1
+                data.width = ((weight / 100) * 7) + 1; // max: 8, min: 1
 
                 if(addingNewEdge){
                     newEdges.add(data);
                 }
                 callback(data);
-                this.networkState.addEdgeMode = false;
+                setAddEdgeMode(false);
             }, false], // true to focus
 
             ['<button id="iziToast_button_cancel" style="'+ buttonStyle +'">Cancel</button>', function (instance, toast, button, e) {
                 instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                 network.disableEditMode();
-                this.networkState.addEdgeMode = false;
+                setAddEdgeMode(false);
             }]
         ],
     });
+}
+
+function setAddEdgeMode(flag){
+    if(flag || typeof flag === 'undefined'){
+        this.network.addEdgeMode();
+        this.networkState.addEdgeMode = true;
+        var container = document.getElementById('networkContainer');
+        var offset = 6;
+        var x = container.offsetLeft + offset;
+        var y = container.offsetTop + offset;
+
+        d3.select('#networkContainer')
+            .append('div')
+            .attr('id', 'addEdgeModeDisplay')
+            .style('left', x + 'px')
+            .style('top', y +'px')
+            .style('position', 'absolute')
+            .text('AddEdgeMode ON')
+            .style('color', 'green');
+
+        d3.select('#networkContainer')
+            .style('border-color','#0E8E1C')
+            .style('border-width','2.5px');
+
+    }else{
+        this.network.disableEditMode();
+        this.networkState.addEdgeMode = false;
+        d3.select('#addEdgeModeDisplay').remove();
+
+        d3.select('#networkContainer')
+            .style('border-color','#000000')
+            .style('border-width','0.8px');
+    }
 }
 
 function getNodeLabel(nodeID){

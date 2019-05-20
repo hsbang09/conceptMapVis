@@ -173,11 +173,9 @@ class ContextMenu {
         switch(option) {
             case 'toggleAddEdgeMode':
                 if(this.networkState.addEdgeMode){
-                    this.network.disableEditMode();
-                    this.networkState.addEdgeMode = false;
+                    setAddEdgeMode(false);
                 } else {
-                    this.network.addEdgeMode();
-                    this.networkState.addEdgeMode = true;
+                    setAddEdgeMode(true);
                 }
                 break;
 
