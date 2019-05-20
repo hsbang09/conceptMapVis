@@ -21,17 +21,12 @@ let orbitTypes = ['sun-synchronousOrbit', 'polarOrbit'];
 let groups = [instruments, instrumentTypes, measurements, spectralRegion, illuminationCondition, instrumentPower,
                 orbits, altitudes, LTAN, orbitTypes];
 
-var contexMenu = null;
+var contextMenu = null;
+var networkState = {addEdgeMode: false}
 
 $.getJSON("visData/ClimateCentric-4.json", (d) => {
 
     data = d;
-
-    // create an array with nodes
-    nodes = new vis.DataSet(data.nodes);
-
-    // create an array with edges
-    edges = new vis.DataSet(data.edges);
 
     for(let i = 0; i < data.nodes.length; i++){
         let node = data.nodes[i];
@@ -51,6 +46,13 @@ $.getJSON("visData/ClimateCentric-4.json", (d) => {
     var container = document.getElementById('networkContainer');
 
     var options = {
+            edges:{
+                color: {
+                    color: '#848484',
+                    inherit: false,
+                },
+                width: 1.2,
+            }, 
             manipulation: {
                 enabled: false,
                 // addNode: function (data, callback) {
@@ -62,49 +64,40 @@ $.getJSON("visData/ClimateCentric-4.json", (d) => {
                 //     console.log('edit', data);
                 // },
                 addEdge: function (data, callback) {
-                    addNewEdge(data, callback);
+                    editEdge(data, callback);
                 }
             }
         };
 
-    network = new vis.Network(container, data, options);
+    // create an array with nodes
+    nodes = new vis.DataSet(data.nodes);
 
-    network.on("oncontext", function (params) {
-        var nodeID = this.getNodeAt(params.pointer.DOM);
-        var edgeID = this.getEdgeAt(params.pointer.DOM);
+    // create an array with edges
+    edges = new vis.DataSet(data.edges);
 
-        console.log(params);
+    var inputData = {
+                        nodes: nodes,
+                        edges: edges
+                    };
+
+    network = new vis.Network(container, inputData, options);
+
+    // Add new context menu
+    container.addEventListener('contextmenu', (e) => {
+        var coord = {x: e.layerX, y: e.layerY}
+        var nodeID = network.getNodeAt(coord);
+        var edgeID = network.getEdgeAt(coord);
         if(nodeID){  
-            console.log("node");
-            console.log(nodeID);
-            this.selectNodes([nodeID]);
+            // this.selectNodes([nodeID]);
         }else if(edgeID){
-            console.log("edge");
-            console.log(edgeID);
-            this.selectEdges([edgeID]);
-        }        
-    });
+            network.selectEdges([edgeID]);
+        }
+
+        contextMenu = new ContextMenu(network, newEdges, networkState);
+        contextMenu.showMenu(e, edgeID);
+        e.preventDefault()
+    }, false);
 });
-
-
-function addConnections(elem, index) {
-    // need to replace this with a tree of the network, then get child direct children of the element
-    elem.connections = network.getConnectedNodes(index);
-}
-
-
-var myNodes = null;
-
-function parseNetwork(){
-
-    var nodes = objectToArray(network.getPositions());
-
-    nodes.forEach(addConnections);
-
-    console.log(nodes);
-
-    myNodes= nodes;
-}
 
 function objectToArray(obj) {
     return Object.keys(obj).map(function (key) {
@@ -113,18 +106,59 @@ function objectToArray(obj) {
     });
 }
 
-function addNewEdge(data, callback){
+function editEdge(data, callback){
 
-    var title = "Adding a new link between " + getNodeLabel(data.from) + " and " + getNodeLabel(data.to) + "\n";
+    var addingNewEdge = true;
+    var initialWeight = null;
+    var initialConnectionType = null;
+    if(typeof data.label !== "undefined"){
+        addingNewEdge = false;
+        if(data.label.indexOf("hasSynergyWith") !== -1){
+            initialConnectionType = "hasSynergyWith";
+        }else if(data.label.indexOf("mustAvoid") !== -1){
+            initialConnectionType = "mustAvoid";
+        }
 
-    var linkTypeInput = '<select>'
+        if(data.weight){
+            initialWeight = data.weight;
+        }
+    }
+
+    var title;
+    if(addingNewEdge){
+        title = "Adding a new link between " + getNodeLabel(data.from) + " and " + getNodeLabel(data.to) + "\n";
+    }else{
+        title = "Modifying the link between " + getNodeLabel(data.from) + " and " + getNodeLabel(data.to) + "\n";
+    }
+
+    var linkTypeInput, weightInput;
+    if(addingNewEdge){
+        linkTypeInput = '<select>'
                             + '<option value="select"> Select </option>'
                             + '<option value="hasSynergyWith"> hasSynergyWith </option>'
                             + '<option value="mustAvoid"> mustAvoid </option>'
-                        + '</select>'
+                        + '</select>';
 
-    let buttonsStyle = "width: 150px;" +
-                    "float: left;";
+        weightInput = '<input type="number">';
+    }else{
+        if(initialConnectionType === "hasSynergyWith"){
+            linkTypeInput = '<select>'
+                            + '<option value="hasSynergyWith" selected> hasSynergyWith </option>'
+                            + '<option value="mustAvoid"> mustAvoid </option>'
+                        + '</select>';
+        }else if(initialConnectionType === "mustAvoid"){
+            linkTypeInput = '<select>'
+                            + '<option value="hasSynergyWith"> hasSynergyWith </option>'
+                            + '<option value="mustAvoid" selected> mustAvoid </option>'
+                        + '</select>';
+        }
+        weightInput = '<input type="number" value="'+ initialWeight +'">';
+    }
+    
+    var buttonStyle = "width: 80px;" 
+                    + "margin-left: 10px"
+                    + "margin-right: 10px"
+                    + "float: left;";
 
     var inputCallback = function(){
         var inputs = d3.selectAll(".iziToast-inputs-child.revealIn").nodes();
@@ -132,7 +166,7 @@ function addNewEdge(data, callback){
         var weight = inputs[1].value;
 
         var confirmButton = d3.select("#iziToast_button_confirm");
-        if(connectionType !== "select" && weight !== ""){
+        if(connectionType !== "select" && weight !== "" && parseInt(weight) >= 0 && parseInt(weight) <= 100){
             // Activate confirm button                    
             confirmButton.node().disabled = false;
             confirmButton.select('b').style("opacity", "1.0");
@@ -152,29 +186,44 @@ function addNewEdge(data, callback){
         id: 'question',
         progressBar: false,
         title: title,
-        message: 'Please select the connection type and the corresponding weight',
+        message: 'Please select the connection type and the corresponding weight (0-100)',
         position: 'center',
         inputs: [
             [linkTypeInput, 'change', function (instance, toast, select, event) {
                 inputCallback();
             }],
-            ['<input type="number">', 'keyup', function (instance, toast, input, event) {
+            [weightInput, 'keyup', function (instance, toast, input, event) {
                 inputCallback();
             }],
         ],
         buttons: [
-            ['<button id="iziToast_button_confirm" disabled><b style="opacity: 0.05">Confirm</b></button>', function (instance, toast, button, event, inputs) {
+            ['<button id="iziToast_button_confirm" disabled style="'+ buttonStyle +'"><b style="opacity: 0.05">Confirm</b></button>', function (instance, toast, button, event, inputs) {
                 instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                 var connectionType = inputs[0].options[inputs[0].selectedIndex].value;
                 var weight = inputs[1].value;
-                data.label = connectionType;
+                data.label = connectionType + " (" + weight + ")";
                 data.weight = weight;
-                newEdges.add(data);
-                callback(data);
 
+                if(connectionType === "hasSynergyWith"){
+                    data.color = { color: '#25CF37',
+                                    highlight: '#25CF37'};
+                }else if(connectionType === "mustAvoid"){
+                    data.color = { color: '#FF2222',
+                                    highlight: '#FF2222'};
+                }
+                data.width = ((weight / 100) * 6) + 1; // max: 8, min: 1
+
+                if(addingNewEdge){
+                    newEdges.add(data);
+                }
+                callback(data);
+                this.networkState.addEdgeMode = false;
             }, false], // true to focus
-            ['<button id="iziToast_button_cancel">Cancel</button>', function (instance, toast, button, e) {
+
+            ['<button id="iziToast_button_cancel" style="'+ buttonStyle +'">Cancel</button>', function (instance, toast, button, e) {
                 instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                network.disableEditMode();
+                this.networkState.addEdgeMode = false;
             }]
         ],
     });
