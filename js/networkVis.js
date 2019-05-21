@@ -26,6 +26,7 @@ let groups = [instruments, instrumentTypes, measurements, spectralRegion, illumi
                 orbits, altitudes, LTAN, orbitTypes];
 
 var contextMenu = null;
+var contextMenuEventListener = null;
 var networkState = {addEdgeMode: false}
 
 $.getJSON("visData/ClimateCentric-4.json", (d) => {
@@ -89,8 +90,7 @@ $.getJSON("visData/ClimateCentric-4.json", (d) => {
 
     network = new vis.Network(container, inputData, options);
 
-    // Add new context menu
-    container.addEventListener('contextmenu', (e) => {
+    contextMenuEventListener = function(e) {
         var coord = {x: e.layerX, y: e.layerY}
         var nodeID = network.getNodeAt(coord);
         var edgeID = network.getEdgeAt(coord);
@@ -103,7 +103,10 @@ $.getJSON("visData/ClimateCentric-4.json", (d) => {
         contextMenu = new ContextMenu(network, newEdges, networkState);
         contextMenu.showMenu(e, edgeID);
         e.preventDefault()
-    }, false);
+    }
+
+    // Add new context menu
+    container.addEventListener('contextmenu', contextMenuEventListener, false);
 
     setAddEdgeMode(false);
 });
@@ -239,13 +242,12 @@ function editEdge(data, callback){
 
 function setAddEdgeMode(flag){
     if(flag || typeof flag === 'undefined'){
-        this.network.addEdgeMode();
-        this.networkState.addEdgeMode = true;
+        network.addEdgeMode();
+        networkState.addEdgeMode = true;
         var container = document.getElementById('networkContainer');
         var offset = 6;
         var x = container.offsetLeft + offset;
         var y = container.offsetTop + offset;
-
         d3.select('#networkContainer')
             .append('div')
             .attr('id', 'addEdgeModeDisplay')
@@ -260,8 +262,8 @@ function setAddEdgeMode(flag){
             .style('border-width','2.5px');
 
     }else{
-        this.network.disableEditMode();
-        this.networkState.addEdgeMode = false;
+        network.disableEditMode();
+        networkState.addEdgeMode = false;
         d3.select('#addEdgeModeDisplay').remove();
 
         d3.select('#networkContainer')

@@ -26,9 +26,7 @@ class ContextMenu {
     }    
 
     showMenu (event, context) {
-
         var edgeID = context;
-
         var items = [];
         if(edgeID){
             // Iterate over the newly added edges
