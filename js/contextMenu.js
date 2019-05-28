@@ -1,20 +1,32 @@
 
 // Context info: node, depth, logic(AND or OR)
 
-class ContextMenu {
-    
-    constructor(network, newEdges, networkState){
+class ContextMenu {   
+    constructor(network, nodes, edges, newNodes, newEdges, networkState){
 
         this.network = network;
+        this.nodes = nodes;
+        this.edges = edges;
+        this.newNodes = newNodes;
         this.newEdges = newEdges;
         this.networkState = networkState;
         this.marginRatio = 0.13;
 
         this.contextItems = {
-            'edge': [{'value': 'removeEdge', 'text': 'Remove this edge'},
-                    {'value': 'modifyEdge', 'text': 'Modify this edge'}
-                    ],
-            'default':[{'value': 'toggleAddEdgeMode', 'text': 'Add new edge'}]
+            'edge': [
+                {'value': 'removeEdge', 'text': 'Remove this edge'},
+                {'value': 'modifyEdge', 'text': 'Modify this edge'}
+            ],
+            'node': [
+                {'value': 'removeNode', 'text': 'Remove this node'}
+            ],
+            'addNodeMode':[
+                {'value':'confirmNodeAddition','text':'Confirm concept addition'}
+            ],
+            'default':[
+                {'value': 'toggleAddNodeMode', 'text': 'Add new concept'},
+                {'value': 'toggleAddEdgeMode', 'text': 'Add new connection'}
+            ]
         };
 
         this.contextMenuSize = {
@@ -26,18 +38,59 @@ class ContextMenu {
     }    
 
     showMenu (event, context) {
-        var edgeID = context;
+
         var items = [];
-        if(edgeID){
+        if(this.networkState.addNodeMode){
+            items = items.concat(this.contextItems['addNodeMode']);
+        }
+
+        let nodeID = null;
+        let edgeID = null;
+        this.nodes.forEach((d) => {
+            if(d.id === context){
+                nodeID = context;
+            }
+        })
+        this.edges.forEach((d) => {
+            if(d.id === context){
+                edgeID = context;
+            }
+        })
+
+        if(nodeID){
+            // Iterate over the newly added nodes
+            if(this.newNodes.get(nodeID)){
+                items = items.concat(this.contextItems['node']);
+            }
+        } else if(edgeID){
             // Iterate over the newly added edges
-            var newlyAddedEdge = false;
             if(this.newEdges.get(edgeID)){
-                newlyAddedEdge = true;
-                items = this.contextItems["edge"];
+                items = items.concat(this.contextItems['edge']);
             }
         }  
         items = items.concat(this.contextItems['default']);
 
+        // Remove illegal options
+        if(this.networkState.addNodeMode){
+            let index = -1;
+            for(let i = 0; i < items.length; i++){
+                if(items[i].value === 'toggleAddEdgeMode'){
+                    index = i;
+                    break;
+                }
+            }
+            items.splice(index,1);
+        }else if(this.networkState.addEdgeMode){
+            let index = -1;
+            for(let i = 0; i < items.length; i++){
+                if(items[i].value === 'toggleAddNodeMode'){
+                    index = i;
+                    break;
+                }
+            }
+            items.splice(index,1);
+        }
+        
         d3.select('.context-menu').remove();
         this.scaleItems(items);
         
@@ -105,13 +158,19 @@ class ContextMenu {
             .style('stroke', 'white')
             .style('stroke-width', '1px')
             .text((d) => { 
-                if(d.value === "toggleAddEdgeMode") {
-                    if(this.networkState.addEdgeMode){
-                        return 'Cancel edge addition';
+                if(d.value === "toggleAddNodeMode") {
+                    if(this.networkState.addNodeMode){
+                        return 'Cancel concept addition';
                     }else{
-                        return 'Add new edge';
+                        return 'Add new concept';
                     }
-                }           
+                } else if(d.value === "toggleAddEdgeMode") {
+                    if(this.networkState.addEdgeMode){
+                        return 'Cancel connection addition';
+                    }else{
+                        return 'Add new connection';
+                    }
+                }              
                 return d.text; 
             })
             .style('color', 'steelblue')
@@ -126,9 +185,7 @@ class ContextMenu {
     
     // Automatically set width, height, and margin;
     scaleItems(items) {
-
         if(!this.contextMenuSize['default']['scaled']){
-
             let tempContextMenu = d3.select('#networkContainer')
                                     .append('svg')
                                     .append('g')
@@ -165,10 +222,23 @@ class ContextMenu {
     }
     
     ContextMenuAction(context, option){
-
-        var edgeID = context;
-
         switch(option) {
+            case 'confirmNodeAddition':
+                if(selectedNodes.length < 2){
+                    displayWarning("At least two nodes must be selected to add new concept","");
+                }else{
+                    addNode();
+                }
+                break;
+
+            case 'toggleAddNodeMode':
+                if(this.networkState.addNodeMode){
+                    setAddNodeMode(false);
+                } else {
+                    setAddNodeMode(true);
+                }
+                break;
+
             case 'toggleAddEdgeMode':
                 if(this.networkState.addEdgeMode){
                     setAddEdgeMode(false);
@@ -177,14 +247,20 @@ class ContextMenu {
                 }
                 break;
 
-            case 'removeEdge':
-                this.network.selectEdges([edgeID]);
+            case 'removeNode':
+                this.network.selectNodes([context]);
                 this.network.deleteSelected();
-                this.newEdges.remove(edgeID);
+                this.newNodes.remove(context);
+                break;
+
+            case 'removeEdge':
+                this.network.selectEdges([context]);
+                this.network.deleteSelected();
+                this.newEdges.remove(context);
                 break;
 
             case 'modifyEdge':
-                var data = this.newEdges.get(edgeID);
+                var data = this.newEdges.get(context);
                 var callback = (d) => {
                     edges.update(d);
                     newEdges.update(d);

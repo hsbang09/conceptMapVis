@@ -8,9 +8,12 @@
   <script type="text/javascript" src="js/lib/d3v5.min.js"></script>
   <script type="text/javascript" src="js/lib/vis.min.js"></script>
   <script src="js/lib/iziToast.min.js" type="text/javascript"></script>
+  <script src="js/lib/intro.js" type="text/javascript"></script>
   <link href="css/lib/iziToast.min.css" rel="stylesheet" type="text/css">
   <link href="css/lib/vis-network.min.css" rel="stylesheet" type="text/css" />
+  <link href="css/lib/introjs.css" rel="stylesheet" type="text/css"/>
   <link href="css/networkVis.css" rel="stylesheet" type="text/css" />
+  <link href="css/experiment.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
@@ -35,8 +38,12 @@
   <script type="text/javascript">
 
     experiment = new Experiment();
-    experiment.generateSignInMessage();
-    
+    //experiment.generateSignInMessage();
+
+
+    experiment.startNextStage();
+    experiment.stopTimer();
+
   </script>
 
 </body>

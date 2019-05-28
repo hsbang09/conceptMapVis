@@ -1,33 +1,44 @@
 
 var seed = 392258;
-// var seed = undefined;
-
+// let seed = undefined;
 
 var data = null;
 var network = null;
 var nodes = null;
 var edges = null;
+var newNodes = new vis.DataSet([]);
 var newEdges = new vis.DataSet([]);
 
-let instruments = ['OCE_SPEC', 'AERO_POL','SAR_ALTIM', 'VEG_INSAR', 'CPR_RAD', 'HYP_IMAG', 'OCE_SPEC',
+var instruments = ['OCE_SPEC', 'AERO_POL','SAR_ALTIM', 'VEG_INSAR', 'CPR_RAD', 'HYP_IMAG', 'OCE_SPEC',
                                 'HIRES_SOUND', 'VEG_LID', 'CHEM_SWIRSPEC', 'HYP_ERB', 'AERO_LID', 'CHEM_UVSPEC'];
-let instrumentTypes = ['radar', 'lidar', 'imager'];
-let measurements = ['topography', 'atmosphericChem', 'oceanColor', 'cloud', 'atmHumidity', 'landCover', 
+var instrumentTypes = ['radar', 'lidar', 'imager'];
+var measurements = ['topography', 'atmosphericChem', 'oceanColor', 'cloud', 'atmHumidity', 'landCover', 
                     'soilMoisture', 'radiationBudget', 'vegetation', 'aerosol', 'seaSurfaceCurrent']
-let spectralRegion = ['VNIR', ''];
-let illuminationCondition = ['active, passive'];
-let instrumentPower = ['highPower', 'lowPower'];
-let orbits = ['LEO-600-polar', 'SSO-600-AM', 'SSO-600-DD', 'SSO-800-DD', 'SSO-800-PM'];
-let altitudes = ['600km', '800km'];
-let LTAN = ['AM', 'PM', 'dawn-dusk'];
-let orbitTypes = ['sun-synchronousOrbit', 'polarOrbit'];
+var spectralRegion = ['VNIR'];
+var illuminationCondition = ['active', 'passive'];
+var instrumentPower = ['highPower', 'lowPower'];
+var orbits = ['LEO-600-polar', 'SSO-600-AM', 'SSO-600-DD', 'SSO-800-DD', 'SSO-800-PM'];
+var altitudes = ['600km', '800km'];
+var LTAN = ['AM', 'PM', 'dawn-dusk'];
+var orbitTypes = ['sun-synchronousOrbit', 'polarOrbit'];
 
-let groups = [instruments, instrumentTypes, measurements, spectralRegion, illuminationCondition, instrumentPower,
+var groups = [instruments, instrumentTypes, measurements, spectralRegion, illuminationCondition, instrumentPower,
                 orbits, altitudes, LTAN, orbitTypes];
+
+var instrumentProperties = {"is-a": instrumentTypes,
+                            "measures": measurements,
+                            "operates in": spectralRegion,
+                            "has illumination condition": illuminationCondition,
+                            "requires": instrumentPower};
+
+var orbitProperties = {"has altitude": altitudes,
+                        "has LTAN": LTAN,
+                        "is-a": orbitTypes};
 
 var contextMenu = null;
 var contextMenuEventListener = null;
-var networkState = {addEdgeMode: false}
+var networkState = {addNodeMode: false, addEdgeMode: false}
+var selectedNodes = [];
 
 $.getJSON("visData/ClimateCentric-4.json", (d) => {
 
@@ -48,9 +59,9 @@ $.getJSON("visData/ClimateCentric-4.json", (d) => {
     }
 
     // create a network
-    var container = document.getElementById('networkContainer');
+    let container = document.getElementById('networkContainer');
 
-    var options = {
+    let options = {
             layout: {
                 randomSeed: seed,
             },
@@ -61,6 +72,9 @@ $.getJSON("visData/ClimateCentric-4.json", (d) => {
                 },
                 width: 1.2,
             }, 
+            interaction:{
+                hover:true
+            },
             manipulation: {
                 enabled: false,
                 // addNode: function (data, callback) {
@@ -83,33 +97,134 @@ $.getJSON("visData/ClimateCentric-4.json", (d) => {
     // create an array with edges
     edges = new vis.DataSet(data.edges);
 
-    var inputData = {
+    let inputData = {
                         nodes: nodes,
                         edges: edges
                     };
 
     network = new vis.Network(container, inputData, options);
 
+    nodeClickCallback = function(params) {
+        let nodeID = network.getNodeAt(params.pointer.DOM);
+        
+        if(networkState.addNodeMode){
+            network.unselectAll();
+            if(nodeID){
+                let nodeData = nodes.get(nodeID);
+                let label = nodeData.label;
+                let types = identifyTypeOfConcept(label);
+                if(types){
+                    let pass = true;
+                    for(let i = 0; i < selectedNodes.length; i++){
+                        previouslySelected = nodes.get(selectedNodes[i]);
+                        let typesToCompare = identifyTypeOfConcept(previouslySelected.label);
+
+                        if(nodeID === previouslySelected.id){
+                            displayWarning("Already selected", "");
+                            pass = false;
+                            break;
+                        }
+                        if(types[0] !== typesToCompare[0]){
+                            displayWarning("Orbit properties and instrument properties cannot be used together to define a new concept", "");
+                            pass = false;
+                            break;
+                        }
+                        if(["measures", "operates in"].indexOf(typesToCompare[1]) === -1){
+                            if(types[1] === typesToCompare[1]){
+                                displayWarning("This property is mutually exclusive with one of the properties already selected", "");
+                                pass = false;
+                                break;
+                            }
+                        }
+                    }
+                    if(pass){
+                        selectedNodes.push(nodeID);   
+                    }
+                } else {
+                    if(newNodes.get(nodeID)){
+                        displayWarning("New node can only be defined using pre-existing concepts","");
+                    }else{
+                        displayWarning("A property node should be selected instead of a specific orbit/instrument instance to generate a new concept", "");
+                    }
+                }
+                network.selectNodes(selectedNodes);
+            }else{
+                selectedNodes = [];
+            }
+        }
+    }
+
+    nodeDragCallBack = function(params){        
+        if(networkState.addNodeMode){
+            network.unselectAll();
+            network.selectNodes(selectedNodes);
+        }
+    }
+
     contextMenuEventListener = function(e) {
-        var coord = {x: e.layerX, y: e.layerY}
-        var nodeID = network.getNodeAt(coord);
-        var edgeID = network.getEdgeAt(coord);
+        let coord = {x: e.layerX, y: e.layerY}
+        let nodeID = network.getNodeAt(coord);
+        let edgeID = network.getEdgeAt(coord);
+        let context = null;
         if(nodeID){  
-            // this.selectNodes([nodeID]);
+            network.selectNodes([nodeID]);
+            context = nodeID;
         }else if(edgeID){
             network.selectEdges([edgeID]);
+            context = edgeID;
         }
-
-        contextMenu = new ContextMenu(network, newEdges, networkState);
-        contextMenu.showMenu(e, edgeID);
+        contextMenu = new ContextMenu(network, nodes, edges, newNodes, newEdges, networkState);
+        contextMenu.showMenu(e, context);
         e.preventDefault()
     }
+
+    network.on("click", nodeClickCallback, false);
+    network.on("dragStart", nodeDragCallBack, false);
 
     // Add new context menu
     container.addEventListener('contextmenu', contextMenuEventListener, false);
 
     setAddEdgeMode(false);
 });
+
+function identifyTypeOfConcept(conceptLabel){
+    let propertyGroupConnector = null;
+    let isOrbitProp = false;
+    for(let prop in orbitProperties){
+        for(let j = 0; j < orbitProperties[prop].length; j++){
+            if(orbitProperties[prop][j] === conceptLabel){
+                isOrbitProp = true;
+                propertyGroupConnector = prop;
+                break;
+            }
+        }
+    }
+    let isInstrumentProp = false;
+    if(!isOrbitProp){
+        for(let prop in instrumentProperties){
+            for(let j = 0; j < instrumentProperties[prop].length; j++){
+                if(instrumentProperties[prop][j] === conceptLabel){
+                    isInstrumentProp = true;
+                    propertyGroupConnector = prop;
+                    break;
+                }
+            }
+        }
+    }
+
+    if(!isOrbitProp && !isInstrumentProp){
+        return null;
+    }else{
+        let out = [];
+        if(isOrbitProp){
+            out.push(0);
+        }else{
+            out.push(1);
+        }
+        out.push(propertyGroupConnector);
+        return out;
+    }
+}
 
 function objectToArray(obj) {
     return Object.keys(obj).map(function (key) {
@@ -118,10 +233,72 @@ function objectToArray(obj) {
     });
 }
 
+function generateRandomUniqueID(){
+    let out = "";
+    for(let i = 0; i < 20; i++){
+        out += "" + Math.floor(Math.random() * 10);
+    }
+    return out;
+}
+
+function addNode(){
+    let nodeData = {id: null,
+                group: null,
+                label: null};
+
+    let edgeDataList = [];
+
+    let isOrbitProp = false;
+    let newID = generateRandomUniqueID();
+    let newLabel = "";
+    for(let i = 0; i < selectedNodes.length; i++){
+        let label = nodes.get(selectedNodes[i]).label;
+        let types = identifyTypeOfConcept(label);
+        let connector = types[1];
+        if(i === 0){
+            if(types[0] === 0){
+                isOrbitProp = true;
+                newLabel += "Orbit";
+            }else{
+                isOrbitProp = false;
+                newLabel += "Instrument";
+            }
+            newLabel += " that ";
+        }else{
+            newLabel += " AND ";
+        }
+        newLabel +=  connector + " " + label;
+
+        let edgeData = {id: generateRandomUniqueID(),
+                        from: selectedNodes[i],
+                        to: newID,
+                        label: null};
+        edgeDataList.push(edgeData);
+    }
+
+    nodeData.id = newID;
+    if(isOrbitProp){
+        nodeData.group = groups.length;
+    }else{
+        nodeData.group = groups.length + 1;
+    }
+    nodeData.title = newLabel;
+
+    // Add new node
+    nodes.add(nodeData);
+    newNodes.add(nodeData);
+
+    // Add edges connecting to the newly added node
+    for(let i = 0; i < edgeDataList.length; i++){
+        edges.add(edgeDataList[i]);
+    }
+    setAddNodeMode(false);
+}
+
 function editEdge(data, callback){
-    var addingNewEdge = true;
-    var initialWeight = null;
-    var initialConnectionType = null;
+    let addingNewEdge = true;
+    let initialWeight = null;
+    let initialConnectionType = null;
     if(typeof data.label !== "undefined"){
         addingNewEdge = false;
         if(data.label.indexOf("hasSynergyWith") !== -1){
@@ -135,14 +312,14 @@ function editEdge(data, callback){
         }
     }
 
-    var title;
+    let title;
     if(addingNewEdge){
         title = "Adding a new link between " + getNodeLabel(data.from) + " and " + getNodeLabel(data.to) + "\n";
     }else{
         title = "Modifying the link between " + getNodeLabel(data.from) + " and " + getNodeLabel(data.to) + "\n";
     }
 
-    var linkTypeInput, weightInput;
+    let linkTypeInput, weightInput;
     if(addingNewEdge){
         linkTypeInput = '<select>'
                             + '<option value="select"> Select </option>'
@@ -166,23 +343,23 @@ function editEdge(data, callback){
         weightInput = '<input type="number" value="'+ initialWeight +'">';
     }
     
-    var buttonStyle = "width: 80px;" 
+    let buttonStyle = "width: 80px;" 
                     + "margin-left: 10px"
                     + "margin-right: 10px"
                     + "float: left;";
 
-    var inputCallback = function(){
-        var inputs = d3.selectAll(".iziToast-inputs-child.revealIn").nodes();
-        var connectionType = inputs[0].value;
-        var weight = inputs[1].value;
+    let inputCallback = function(){
+        let inputs = d3.selectAll(".iziToast-inputs-child.revealIn").nodes();
+        let connectionType = inputs[0].value;
+        let weight = inputs[1].value;
 
-        var confirmButton = d3.select("#iziToast_button_confirm");
+        let confirmButton = d3.select("#iziToast_button_confirm");
         if(connectionType !== "select" && weight !== "" && parseInt(weight) >= 0 && parseInt(weight) <= 100){
             // Activate confirm button                    
             confirmButton.node().disabled = false;
             confirmButton.select('b').style("opacity", "1.0");
         } else {
-            var confirmButton = d3.select("#iziToast_button_confirm");
+            let confirmButton = d3.select("#iziToast_button_confirm");
             confirmButton.node().disabled = true;
             confirmButton.select('b').style("opacity", "0.05");
         }
@@ -210,17 +387,19 @@ function editEdge(data, callback){
         buttons: [
             ['<button id="iziToast_button_confirm" disabled style="'+ buttonStyle +'"><b style="opacity: 0.05">Confirm</b></button>', function (instance, toast, button, event, inputs) {
                 instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                var connectionType = inputs[0].options[inputs[0].selectedIndex].value;
-                var weight = inputs[1].value;
+                let connectionType = inputs[0].options[inputs[0].selectedIndex].value;
+                let weight = inputs[1].value;
                 data.label = connectionType + " (" + weight + ")";
                 data.weight = weight;
 
                 if(connectionType === "hasSynergyWith"){
                     data.color = { color: '#25CF37',
-                                    highlight: '#25CF37'};
+                                    highlight: '#25CF37',
+                                    hover: '#25CF37'};
                 }else if(connectionType === "mustAvoid"){
                     data.color = { color: '#FF2222',
-                                    highlight: '#FF2222'};
+                                    highlight: '#FF2222',
+                                    hover: '#FF2222'};
                 }
                 data.width = ((weight / 100) * 7) + 1; // max: 8, min: 1
 
@@ -240,21 +419,56 @@ function editEdge(data, callback){
     });
 }
 
-function setAddEdgeMode(flag){
+function setAddNodeMode(flag){
+    selectedNodes = [];
+    network.unselectAll();
     if(flag || typeof flag === 'undefined'){
-        network.addEdgeMode();
-        networkState.addEdgeMode = true;
-        var container = document.getElementById('networkContainer');
-        var offset = 6;
-        var x = container.offsetLeft + offset;
-        var y = container.offsetTop + offset;
+        setAddEdgeMode(false);
+        networkState.addNodeMode = true;
+        let container = document.getElementById('networkContainer');
+        let offset = 6;
+        let x = container.offsetLeft + offset;
+        let y = container.offsetTop + offset;
         d3.select('#networkContainer')
             .append('div')
-            .attr('id', 'addEdgeModeDisplay')
+            .attr('id', 'networkEditModeDisplay')
             .style('left', x + 'px')
             .style('top', y +'px')
             .style('position', 'absolute')
-            .text('AddEdgeMode ON')
+            .text('AddNodeMode: select multiple concept nodes to be combined')
+            .style('color', 'blue');
+
+        d3.select('#networkContainer')
+            .style('border-color','#1F57BE')
+            .style('border-width','2.5px');
+
+    }else{
+        network.disableEditMode();
+        networkState.addNodeMode = false;
+        d3.select('#networkEditModeDisplay').remove();
+
+        d3.select('#networkContainer')
+            .style('border-color','#000000')
+            .style('border-width','0.8px');
+    }
+}
+
+function setAddEdgeMode(flag){
+    if(flag || typeof flag === 'undefined'){
+        setAddNodeMode(false);
+        network.addEdgeMode();
+        networkState.addEdgeMode = true;
+        let container = document.getElementById('networkContainer');
+        let offset = 6;
+        let x = container.offsetLeft + offset;
+        let y = container.offsetTop + offset;
+        d3.select('#networkContainer')
+            .append('div')
+            .attr('id', 'networkEditModeDisplay')
+            .style('left', x + 'px')
+            .style('top', y +'px')
+            .style('position', 'absolute')
+            .text('AddEdgeMode: make a new connection by dragging from one node to another node')
             .style('color', 'green');
 
         d3.select('#networkContainer')
@@ -264,7 +478,7 @@ function setAddEdgeMode(flag){
     }else{
         network.disableEditMode();
         networkState.addEdgeMode = false;
-        d3.select('#addEdgeModeDisplay').remove();
+        d3.select('#networkEditModeDisplay').remove();
 
         d3.select('#networkContainer')
             .style('border-color','#000000')
@@ -272,13 +486,26 @@ function setAddEdgeMode(flag){
     }
 }
 
+function displayWarning(title, message){
+    iziToast.warning({
+        title: title,
+        message: message,
+    });
+}
+
 function getNodeLabel(nodeID){
-    var nodeData = data.nodes;
-    for(var i = 0; i < nodeData.length; i++){
-        if(nodeData[i].id === nodeID){
-            return nodeData[i].label;
+    var out = null;
+    nodes.forEach((d) => {
+        if(d.id === nodeID){
+            if(d.label){
+                out = d.label;
+            }else if(d.title){
+                out = d.title;
+            }else{
+                out = null;
+            }
         }
-    }
-    return null;
+    })
+    return out;
 }
 

@@ -11,6 +11,8 @@ class Experiment{
         //      - 2: Problem solving (no modifiication allowed)
         this.experimentStage = -1; 
 
+        this.intro = introJs();
+
         let that = this;
         d3.selectAll('#submitButton').on('click', (d) => { 
             var submit = confirm("Are you sure you want to submit the result?"); 
@@ -54,15 +56,19 @@ class Experiment{
         }else if(this.experimentStage === 1){
             timeLimitExists = false;
 
-            // remove all newly added edges
-            var edgesToRemove = newEdges.clear();
+            // remove all newly added edges and nodes
+            let edgesToRemove = newEdges.clear();
             edges.remove(edgesToRemove);
+
+            let nodesToRemove = newNodes.clear();
+            nodes.remove(nodesToRemove);
 
         }else{
             timeLimitExists = false;
 
             // Disable adding or modifying edges
             setAddEdgeMode(false);
+            setAddNodeMode(false);
             contextMenu = null;
             document.getElementById('networkContainer').removeEventListener('contextmenu', contextMenuEventListener);
             document.getElementById('networkContainer').addEventListener('contextmenu', (e) => {
@@ -109,15 +115,35 @@ class Experiment{
 
         var edgesOut = [];
         newEdges.forEach((d)=>{
-            var edgeCopy = JSON.parse(JSON.stringify(d));
-            var fromNodeLabel = getNodeLabel(d.from);
-            var toNodeLabel = getNodeLabel(d.to);
+            let edgeCopy = JSON.parse(JSON.stringify(d));
+            let fromNodeLabel = getNodeLabel(d.from);
+            let toNodeLabel = getNodeLabel(d.to);
             edgeCopy.fromLabel = fromNodeLabel;
             edgeCopy.toLabel = toNodeLabel;
             edgeCopy.color = undefined;
             edgesOut.push(edgeCopy);
         })
         out.edges = edgesOut;
+
+        var nodesOut = [];
+        newNodes.forEach((d) => {
+            var nodeCopy = JSON.parse(JSON.stringify(d));
+            nodeCopy.connectedNodes = [];
+
+            edges.forEach((d) => {
+                let connectedNode = null;
+                if(d.from === nodeCopy.id){
+                    connectedNode = nodes.get(d.to);
+                }else if( d.to === nodeCopy.id){
+                    connectedNode = nodes.get(d.from);
+                }
+                if(connectedNode){
+                    nodeCopy.connectedNodes.push(connectedNode);
+                }
+            })
+            nodesOut.push(nodeCopy);
+        })
+        out.nodes = nodesOut;
 
         var filename = this.participantID + "-" + this.experimentStage + ".json";
         this.saveTextAsFile(filename, JSON.stringify(out));
