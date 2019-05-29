@@ -14,23 +14,23 @@ class ContextMenu {
 
         this.contextItems = {
             'edge': [
-                {'value': 'removeEdge', 'text': 'Remove this edge'},
-                {'value': 'modifyEdge', 'text': 'Modify this edge'}
+                {'value': 'removeEdge', 'text': 'Remove this relation'},
+                {'value': 'modifyEdge', 'text': 'Modify this relation'}
             ],
             'node': [
-                {'value': 'removeNode', 'text': 'Remove this node'}
+                {'value': 'removeNode', 'text': 'Remove this concept'}
             ],
             'addNodeMode':[
                 {'value':'confirmNodeAddition','text':'Confirm concept addition'}
             ],
             'default':[
                 {'value': 'toggleAddNodeMode', 'text': 'Add new concept'},
-                {'value': 'toggleAddEdgeMode', 'text': 'Add new connection'}
+                {'value': 'toggleAddEdgeMode', 'text': 'Add new relation'}
             ]
         };
 
         this.contextMenuSize = {
-            'default':{'height':null,
+            'default':{'`eight':null,
                     'width':null,
                     'margin':0.15,
                     'scaled':false},
@@ -166,9 +166,9 @@ class ContextMenu {
                     }
                 } else if(d.value === "toggleAddEdgeMode") {
                     if(this.networkState.addEdgeMode){
-                        return 'Cancel connection addition';
+                        return 'Cancel relation addition';
                     }else{
-                        return 'Add new connection';
+                        return 'Add new relation';
                     }
                 }              
                 return d.text; 

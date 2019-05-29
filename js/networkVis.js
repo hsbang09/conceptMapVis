@@ -25,15 +25,15 @@ var orbitTypes = ['sun-synchronousOrbit', 'polarOrbit'];
 var groups = [instruments, instrumentTypes, measurements, spectralRegion, illuminationCondition, instrumentPower,
                 orbits, altitudes, LTAN, orbitTypes];
 
-var instrumentProperties = {"is-a": instrumentTypes,
+var instrumentProperties = {"is": instrumentTypes,
                             "measures": measurements,
                             "operates in": spectralRegion,
                             "has illumination condition": illuminationCondition,
                             "requires": instrumentPower};
 
 var orbitProperties = {"has altitude": altitudes,
-                        "has LTAN": LTAN,
-                        "is-a": orbitTypes};
+                        "has LTAN of": LTAN,
+                        "is": orbitTypes};
 
 var contextMenu = null;
 var contextMenuEventListener = null;
@@ -142,9 +142,9 @@ $.getJSON("visData/ClimateCentric-4.json", (d) => {
                     }
                 } else {
                     if(newNodes.get(nodeID)){
-                        displayWarning("New node can only be defined using pre-existing concepts","");
+                        displayWarning("New concept can only be defined using pre-existing concepts","");
                     }else{
-                        displayWarning("A property node should be selected instead of a specific orbit/instrument instance to generate a new concept", "");
+                        displayWarning("A property should be selected instead of a specific orbit/instrument instance to generate a new concept", "");
                     }
                 }
                 network.selectNodes(selectedNodes);
@@ -293,6 +293,8 @@ function addNode(){
         edges.add(edgeDataList[i]);
     }
     setAddNodeMode(false);
+
+    PubSub.publish(TUTORIAL_EVENT, "new_node_added");
 }
 
 function editEdge(data, callback){
@@ -301,10 +303,10 @@ function editEdge(data, callback){
     let initialConnectionType = null;
     if(typeof data.label !== "undefined"){
         addingNewEdge = false;
-        if(data.label.indexOf("hasSynergyWith") !== -1){
-            initialConnectionType = "hasSynergyWith";
-        }else if(data.label.indexOf("mustAvoid") !== -1){
-            initialConnectionType = "mustAvoid";
+        if(data.label.indexOf("positive") !== -1){
+            initialConnectionType = "positive";
+        }else if(data.label.indexOf("negative") !== -1){
+            initialConnectionType = "negative";
         }
 
         if(data.weight){
@@ -314,30 +316,30 @@ function editEdge(data, callback){
 
     let title;
     if(addingNewEdge){
-        title = "Adding a new link between " + getNodeLabel(data.from) + " and " + getNodeLabel(data.to) + "\n";
+        title = "Adding a new relation between " + getNodeLabel(data.from) + " and " + getNodeLabel(data.to) + "\n";
     }else{
-        title = "Modifying the link between " + getNodeLabel(data.from) + " and " + getNodeLabel(data.to) + "\n";
+        title = "Modifying the relation between " + getNodeLabel(data.from) + " and " + getNodeLabel(data.to) + "\n";
     }
 
     let linkTypeInput, weightInput;
     if(addingNewEdge){
         linkTypeInput = '<select>'
                             + '<option value="select"> Select </option>'
-                            + '<option value="hasSynergyWith"> hasSynergyWith </option>'
-                            + '<option value="mustAvoid"> mustAvoid </option>'
+                            + '<option value="positive"> positive </option>'
+                            + '<option value="negative"> negative </option>'
                         + '</select>';
 
         weightInput = '<input type="number">';
     }else{
-        if(initialConnectionType === "hasSynergyWith"){
+        if(initialConnectionType === "positive"){
             linkTypeInput = '<select>'
-                            + '<option value="hasSynergyWith" selected> hasSynergyWith </option>'
-                            + '<option value="mustAvoid"> mustAvoid </option>'
+                            + '<option value="positive" selected> positive </option>'
+                            + '<option value="negative"> negative </option>'
                         + '</select>';
-        }else if(initialConnectionType === "mustAvoid"){
+        }else if(initialConnectionType === "negative"){
             linkTypeInput = '<select>'
-                            + '<option value="hasSynergyWith"> hasSynergyWith </option>'
-                            + '<option value="mustAvoid" selected> mustAvoid </option>'
+                            + '<option value="positive"> positive </option>'
+                            + '<option value="negative" selected> negative </option>'
                         + '</select>';
         }
         weightInput = '<input type="number" value="'+ initialWeight +'">';
@@ -374,7 +376,7 @@ function editEdge(data, callback){
         id: 'question',
         progressBar: false,
         title: title,
-        message: 'Please select the connection type and the corresponding weight (0-100)',
+        message: 'Please select the relation type and the corresponding weight (0-100)',
         position: 'center',
         inputs: [
             [linkTypeInput, 'change', function (instance, toast, select, event) {
@@ -392,11 +394,11 @@ function editEdge(data, callback){
                 data.label = connectionType + " (" + weight + ")";
                 data.weight = weight;
 
-                if(connectionType === "hasSynergyWith"){
+                if(connectionType === "positive"){
                     data.color = { color: '#25CF37',
                                     highlight: '#25CF37',
                                     hover: '#25CF37'};
-                }else if(connectionType === "mustAvoid"){
+                }else if(connectionType === "negative"){
                     data.color = { color: '#FF2222',
                                     highlight: '#FF2222',
                                     hover: '#FF2222'};
@@ -408,6 +410,9 @@ function editEdge(data, callback){
                 }
                 callback(data);
                 setAddEdgeMode(false);
+
+                PubSub.publish(TUTORIAL_EVENT, "new_edge_defined");
+
             }, false], // true to focus
 
             ['<button id="iziToast_button_cancel" style="'+ buttonStyle +'">Cancel</button>', function (instance, toast, button, e) {
@@ -416,6 +421,9 @@ function editEdge(data, callback){
                 setAddEdgeMode(false);
             }]
         ],
+        onOpened: ()=> {
+            PubSub.publish(TUTORIAL_EVENT, "new_edge_added");
+        },
     });
 }
 
@@ -427,21 +435,22 @@ function setAddNodeMode(flag){
         networkState.addNodeMode = true;
         let container = document.getElementById('networkContainer');
         let offset = 6;
-        let x = container.offsetLeft + offset;
-        let y = container.offsetTop + offset;
+        // let x = container.offsetLeft + offset;
+        // let y = container.offsetTop + offset;
         d3.select('#networkContainer')
             .append('div')
             .attr('id', 'networkEditModeDisplay')
-            .style('left', x + 'px')
-            .style('top', y +'px')
+            .style('left', offset + 'px')
+            .style('top', offset +'px')
             .style('position', 'absolute')
-            .text('AddNodeMode: select multiple concept nodes to be combined')
+            .text('AddConceptMode: select multiple concept nodes to be combined')
             .style('color', 'blue');
 
         d3.select('#networkContainer')
             .style('border-color','#1F57BE')
             .style('border-width','2.5px');
 
+        PubSub.publish(TUTORIAL_EVENT, "set_add_node_mode");
     }else{
         network.disableEditMode();
         networkState.addNodeMode = false;
@@ -460,21 +469,22 @@ function setAddEdgeMode(flag){
         networkState.addEdgeMode = true;
         let container = document.getElementById('networkContainer');
         let offset = 6;
-        let x = container.offsetLeft + offset;
-        let y = container.offsetTop + offset;
+        // let x = container.offsetLeft + offset;
+        // let y = container.offsetTop + offset;
         d3.select('#networkContainer')
             .append('div')
             .attr('id', 'networkEditModeDisplay')
-            .style('left', x + 'px')
-            .style('top', y +'px')
+            .style('left', offset + 'px')
+            .style('top', offset +'px')
             .style('position', 'absolute')
-            .text('AddEdgeMode: make a new connection by dragging from one node to another node')
+            .text('AddRelationMode: define a new relation by dragging from one node to another node')
             .style('color', 'green');
 
         d3.select('#networkContainer')
             .style('border-color','#0E8E1C')
             .style('border-width','2.5px');
 
+        PubSub.publish(TUTORIAL_EVENT, "set_add_edge_mode");
     }else{
         network.disableEditMode();
         networkState.addEdgeMode = false;

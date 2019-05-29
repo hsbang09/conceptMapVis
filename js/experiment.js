@@ -11,8 +11,6 @@ class Experiment{
         //      - 2: Problem solving (no modifiication allowed)
         this.experimentStage = -1; 
 
-        this.intro = introJs();
-
         let that = this;
         d3.selectAll('#submitButton').on('click', (d) => { 
             var submit = confirm("Are you sure you want to submit the result?"); 
@@ -205,8 +203,8 @@ class Experiment{
         var container = document.getElementById('networkContainer');
         var width = container.clientWidth;
         var offset = 6;
-        var x = container.offsetLeft + width - 345;
-        var y = container.offsetTop + offset;
+        var x = + width - 345;
+        var y = + offset;
         d3.select('#networkContainer')
             .append('div')
             .attr('id', 'participantID')

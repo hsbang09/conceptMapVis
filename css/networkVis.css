@@ -2,6 +2,7 @@
 	width: 100%;
 	height: 600px;
 	border: 1px solid lightgray;
+	position: relative;
 }
 
 #outputDiv {
@@ -9,9 +10,30 @@
 	margin-top: 20px;
 }
 
+#outputDiv > div {
+	margin: auto;
+	width: 300px;
+}
+
+#restartTutorialButton {
+	width: 140px;
+	font-size: 13px;
+	margin-right: 10px;
+/*	position: relative;
+	left: 45%;*/
+}
+
+#continueTutorialButton {
+	width: 140px;
+	font-size: 13px;
+	margin-right: 10px;
+/*	position: relative;
+	left: 45%;*/
+}
+
 #submitButton {
 	width: 140px;
 	font-size: 13px;
-	position: relative;
-	left: 45%;
+/*	position: relative;
+	left: 45%;*/
 }
