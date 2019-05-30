@@ -31,8 +31,7 @@
 
   <div id="outputDiv">
     <div id="buttonsContainer">
-      <!-- <button type="button" id="restartTutorialButton">Restart tutorial</button> -->
-      <button type="button" id="continueTutorialButton">Continue tutorial</button>
+      <button type="button" id="tutorialButton">Continue tutorial</button>
       <button type="button" id="submitButton">Submit network</button>
     </div>
   </div>
@@ -45,15 +44,13 @@
   <script type="text/javascript">
 
     var experiment = new Experiment();
-    //experiment.generateSignInMessage();
-
-
-    experiment.startNextStage();
-    experiment.stopTimer();
-
     var tutorial = new Tutorial(experiment, network);
 
-    tutorial.setTutorialContent("start");
+    experiment.generateSignInMessage();
+
+    //tutorial.setTutorialContent("start");
+    // experiment.startNextStage();
+    // experiment.stopTimer();
 
   </script>
 

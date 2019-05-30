@@ -37,6 +37,13 @@ class Experiment{
         if(this.experimentStage === 0){
             timeLimitExists = true;
 
+            // remove all newly added edges and nodes
+            let edgesToRemove = newEdges.clear();
+            edges.remove(edgesToRemove);
+
+            let nodesToRemove = newNodes.clear();
+            nodes.remove(nodesToRemove);
+
             var d1 = 8 * 60 * 1000;
             var callback1 = () => {
                 alert("8 minutes passed! You have 2 more minutes to finish up. If you are finished, you can click the submit button below.");
@@ -252,15 +259,16 @@ class Experiment{
                 }
 
                 if(valid){
-                    that.startNextStage();
                     that.participantID = inputParticipantID;
                     that.displayParticipantID(inputParticipantID);
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                    PubSub.publish(TUTORIAL_EVENT, "start");
 
                 }else{
                     that.generateErrorMessage("Invalid participant ID. Please copy and paste the particpant ID from the tutorial page");
                 }
             }
+
         }else{
             title = "To continue, type in a passcode";
             message = "(Please ask the experimenter to provide the passcode)";
@@ -276,7 +284,6 @@ class Experiment{
                 }
             }
         }
-
 
         iziToast.question({
             drag: false,

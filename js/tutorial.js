@@ -4,11 +4,14 @@ var TUTORIAL_EVENT = "tutorial_event";
 class Tutorial{
     constructor(experiment, network){
         this.intro = introJs();
+        this.intro._options.exitOnOverlayClick = false;
+
         this.experiment = experiment;
         this.network = network;
         this.eventListenerKeyword = null;
         this.stashedEventListenerKeyword = null;
-        this.eventTimer = null;
+        this.eventTimer = new TutorialTimer();
+        this.tutorialDurationTimer = new TutorialTimer();
 
         let that = this;
         PubSub.subscribe(TUTORIAL_EVENT, (msg, data) => {
@@ -19,17 +22,15 @@ class Tutorial{
             }
         });
 
-        d3.selectAll('#restartTutorialButton').on('click', (d) => { 
-            that.setTutorialContent("start");
-        }); 
-
-        d3.selectAll('#continueTutorialButton').on('click', (d) => { 
+        d3.selectAll('#tutorialButton').on('click', (d) => { 
             if(that.stashedEventListenerKeyword){
                 that.setTutorialContent(that.stashedEventListenerKeyword);
             }else{
                 that.setTutorialContent("start");
             }
         }); 
+
+        this.eventListenerKeyword = "start";
     }
 
     start(){
@@ -48,6 +49,20 @@ class Tutorial{
         this.intro.exit();
         this.stopTimer();
         this.eventListenerKeyword = null;
+    }
+
+    skipTutorial(){
+        this.end();
+        setAddNodeMode(false);
+        setAddEdgeMode(false);
+        iziToast.info({
+            title: "You are given 10 minutes to record as many relations as possible based on your prior knowledge.",
+            message: '',
+            position: 'topRight',
+            timeout: 10000
+        });
+        this.experiment.startNextStage();
+        d3.select("#tutorialButton").node().disabled = true;
     }
 
     openIntroMessage(objects, messages, classname, callback){
@@ -97,20 +112,26 @@ class Tutorial{
         };
 
         this.stashedEventListenerKeyword = stage;
+        this.intro.oncomplete(() => {});
         
         if(!stage || stage === "start"){
 
+            this.startTimer(this.tutorialDurationTimer);
+            
             objects = [null,
                         document.getElementById("networkContainer")];
 
             contents = ["In this step, we are going to measure the level of your prior knowledge in designing an Earth observation mission.",
                         
-                        "You will record information using an interactive graphical user interface, which displays different concepts and their relationships in a graph.",
+                        "You will record information using an interactive graph, which displays different concepts and their relationships.",
 
                         "<p>The vertices in this graph represent concepts related to orbits and instruments. The edges represent the relations that connect different concepts.</p>"
                         +"<p>Note that the color of each concept represents its type (e.g. type of measurement, spectral region, altitude of an orbit, etc.).</p>",
 
-                        "<p>Recording new information can be done in two ways:</p> "
+                        "You can move and highlight verticies by dragging the mouse. "+
+                        "This makes it easier to view verticies and their connections when the graph is cluttered.",
+
+                        "<p>Recording new information in this graph can be done in two ways:</p> "
                         +"<p>1. Adding new relations</p>"
                         +"<p>2. Adding new concepts</p>",
 
@@ -118,7 +139,7 @@ class Tutorial{
                         +"<p>(close this message and try selecting \"Add new relation\" option)</p>"];
                         
             callback = function(targetElement) {
-                if(this._currentStep === 4){
+                if(this._currentStep === 5){
                     setAddNodeMode(false);
                     setAddEdgeMode(false);
                     that.eventListenerKeyword = "set_add_edge_mode";
@@ -171,8 +192,8 @@ class Tutorial{
 
                         "<p>Next, you need to provide a number between 0 and 100 to specify the weight. "
                         +"The weight indicates the strength of the relation.</p>"
-                        +"<p>For example, if assigning \"SAR_ALTIM\" to \"LEO-600-polar\" plays one of the most important roles in improving the overall design, "
-                        +"the weight of 100 may be assigned. If the relation exists but the impact is small, then weight of 10 may be assigned. </p>",
+                        +"<p>For example, if assigning \"SAR_ALTIM\" to \"LEO-600-polar\" plays a very important role in improving the overall design, "
+                        +"the weight of 90 may be assigned. If the relation exists but the impact is small, then weight of 10 may be assigned. </p>",
 
                         "After specifying the relation type and the weight, you can click the confirm button."];
                         
@@ -269,17 +290,37 @@ class Tutorial{
             }, delayInMilliseconds);
             return;
 
-        }else if(stage === "new_node_added_after_delay"){
+        } else if(stage === "new_node_added_after_delay"){
             objects = [document.getElementById("networkContainer")];
 
-            contents = ["After the new concept is added, you can hover the mouse over the node to view its label."];
+            contents = ["After the new concept is added, you can hover the mouse over the node to view its label.",
+
+                        "<p>Now you will be given 10 minutes to record any positive or negative relations that you think may be present among the concepts provided.</p>"
+                        + "<p>Try to identify and record as many relations as you can based on your prior knowledge about designing an Earth observation mission.</p>"];
             
             callback = function(targetElement) {
-                if(this._currentStep === 4){
-                    // setAddNodeMode(false);
-                    // setAddEdgeMode(false);
-                    // that.eventListenerKeyword = "set_add_node_mode";
-                    // that.startTimedMessageGenerator("Right-click on the graph display, and select \"Add new concept\" option");
+                if(this._currentStep === 1){
+
+                    that.intro.oncomplete(() => { 
+                        setAddNodeMode(false);
+                        setAddEdgeMode(false);
+
+                        // Save the duration as a file
+                        that.stopTimer(that.tutorialDurationTimer);
+                        let filename = that.experiment.participantID + "-conceptMapTutorial.json";
+                        let out = {participantID = that.participantID, tutorialDuration: that.tutorialDurationTimer.getTimeElapsed() / 1000};
+                        that.experiment.saveTextAsFile(filename, JSON.stringify(out));
+
+                        // Start the first task
+                        iziToast.info({
+                            title: "You are given 10 minutes to record as many relations as possible based on your prior knowledge.",
+                            message: '',
+                            position: 'topRight',
+                            timeout: 10000
+                        });
+                        that.experiment.startNextStage();
+                        d3.select("#tutorialButton").node().disabled = true;
+                    });
                 }
             }
         } 
@@ -310,22 +351,22 @@ class Tutorial{
         };
         callback = [callback1, callback2];
         duration = [d1, d2];
-        this.startTimer(callback, duration);
+        this.startTimer(this.eventTimer, callback, duration);
     }
 
-    startTimer(callback, duration){
+    startTimer(timer, callback, duration){
         // Set the timer
-        this.stopTimer();
-        this.eventTimer = new TutorialTimer();
-        this.eventTimer.setCallback(callback);
-        this.eventTimer.setDuration(duration);
-        this.eventTimer.start();
+        this.stopTimer(timer);
+        timer.setCallback(callback);
+        timer.setDuration(duration);
+        timer.start();
     }
 
-    stopTimer(){
-        if(this.eventTimer){
-            this.eventTimer.stop();
-            this.eventTimer.reset();
+    stopTimer(timer){
+        if(timer){
+            timer.stop();
+        } else if (this.eventTimer){
+            this.stopTimer(this.eventTimer);
         }
     }
 }
