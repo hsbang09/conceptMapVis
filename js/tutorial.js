@@ -308,7 +308,8 @@ class Tutorial{
                         // Save the duration as a file
                         that.stopTimer(that.tutorialDurationTimer);
                         let filename = that.experiment.participantID + "-conceptMapTutorial.json";
-                        let out = {participantID = that.participantID, tutorialDuration: that.tutorialDurationTimer.getTimeElapsed() / 1000};
+                        let durationInSeconds = that.tutorialDurationTimer.getTimeElapsed() / 1000;
+                        let out = {participantID: that.participantID, tutorialDuration: durationInSeconds};
                         that.experiment.saveTextAsFile(filename, JSON.stringify(out));
 
                         // Start the first task

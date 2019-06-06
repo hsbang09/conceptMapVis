@@ -244,7 +244,11 @@ class Experiment{
                 var inputParticipantID = inputs[0].value;
                 var valid = true;
 
-                if(inputParticipantID.indexOf("004819") === -1){
+                if(inputParticipantID.indexOf("articipan") !== -1){
+                    valid = false;
+                } else if(inputParticipantID.indexOf("ID:") !== -1){
+                    valid = false;
+                } else if(inputParticipantID.indexOf("004819") === -1){
                     valid = false;
                 }
 
