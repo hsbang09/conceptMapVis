@@ -279,7 +279,7 @@ class Experiment{
             submitCallback = function (instance, toast, button, event, inputs) {
 
                 var input = inputs[0].value;
-                if(input === "qkdgustmd"){
+                if(input === "goseakers"){
                     that.startNextStage();
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
 
