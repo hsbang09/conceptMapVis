@@ -43,10 +43,24 @@
 
   <script type="text/javascript">
 
-    var experiment = new Experiment();
-    var tutorial = new Tutorial(experiment, network);
+    var conceptMap = new ConceptMap("visData/ClimateCentric-4.json");
 
-    experiment.generateSignInMessage();
+    var experiment = new Experiment(conceptMap);
+    var tutorial = new Tutorial(conceptMap, experiment);
+
+
+
+
+
+    // experiment.generateSignInMessage();
+
+
+
+
+    experiment.participantID = exampleParticipantID;
+    experiment.displayParticipantID(experiment.participantID);
+    PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "start");
+
 
     // tutorial.setTutorialContent("start");
     // experiment.startNextStage();

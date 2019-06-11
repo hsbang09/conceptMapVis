@@ -1,21 +1,25 @@
 
-var TUTORIAL_EVENT = "tutorial_event";
+var EXPERIMENT_TUTORIAL_EVENT = "tutorial_event";
 
 class Tutorial{
-    constructor(experiment, network){
+    constructor(conceptMap, experiment){
         this.intro = introJs();
         this.intro._options.exitOnOverlayClick = false;
 
+        this.conceptMap = conceptMap;
         this.experiment = experiment;
-        this.network = network;
+        this.network = conceptMap.network;
         this.eventListenerKeyword = null;
         this.stashedEventListenerKeyword = null;
         this.eventTimer = new TutorialTimer();
         this.tutorialDurationTimer = new TutorialTimer();
 
         let that = this;
-        PubSub.subscribe(TUTORIAL_EVENT, (msg, data) => {
-            if(that.eventListenerKeyword){
+        PubSub.subscribe(EXPERIMENT_TUTORIAL_EVENT, (msg, data) => {
+            if(data === "start" || data === "learning_task" || data === "problem_solving"){
+                that.setTutorialContent(data);
+
+            }else if(that.eventListenerKeyword){
                 if(data === that.eventListenerKeyword){
                     that.setTutorialContent(data);
                 }
@@ -34,14 +38,21 @@ class Tutorial{
     }
 
     start(){
+        let that = this;
         this.intro.start();
 
         // Disable SKIP button until it reaches the last step
         $('.introjs-skipbutton').hide();
-        this.intro.onafterchange(function(){          
+        this.intro.onafterchange(function(targetElement) {          
             if (this._introItems.length - 1 == this._currentStep || this._introItems.length == 1) {
                 $('.introjs-skipbutton').show();
             } 
+
+            if(that.eventListenerKeyword === "final_page"){
+                d3.select('.introjs-skipbutton')
+                    .text("START TASK")
+                    .style('color','red');
+            }
         });
     }
 
@@ -53,10 +64,12 @@ class Tutorial{
 
     skipTutorial(){
         this.end();
-        setAddNodeMode(false);
-        setAddEdgeMode(false);
+        this.conceptMap.setAddNodeMode(false);
+        this.conceptMap.setAddEdgeMode(false);
+        // Start the first task
+        iziToast.destroy();
         iziToast.info({
-            title: "You are given 10 minutes to record as many relations as possible based on your prior knowledge.",
+            title: "Record as many relations as possible based on your prior knowledge",
             message: '',
             position: 'topRight',
             timeout: 10000
@@ -65,15 +78,19 @@ class Tutorial{
         d3.select("#tutorialButton").node().disabled = true;
     }
 
-    openIntroMessage(objects, messages, classname, callback){
+    openIntroMessage(objects, messages, classname, onChangeCallback, onExitCallback){
         this.intro.exit();
         this.stopTimer();
         this.eventListenerKeyword = null;
 
         if(messages.length === 1){
-            this.intro.setOption('showButtons', false).setOption('showBullets', false);
+            this.intro
+                .setOption('showButtons', false)
+                .setOption('showBullets', false);
         }else{
-            this.intro.setOption('showButtons', true).setOption('showBullets', true);
+            this.intro
+                .setOption('showButtons', true)
+                .setOption('showBullets', true);
         }
         
         if(!classname){
@@ -99,52 +116,62 @@ class Tutorial{
                 }
             }
         }
-        this.intro.setOptions({steps:steps, tooltipClass:classname}).onchange(callback);
+        this.intro.setOptions({steps:steps, tooltipClass:classname})
+            .onchange(onChangeCallback)
+            .onexit(onExitCallback);
+
         this.start(); 
     }
 
     setTutorialContent(stage){
         let that = this;
-        let objects, contents, classname, callback;        
+        let objects, contents, classname, onChangeCallback, onExitCallback;        
 
-        callback = function(){
+        onChangeCallback = function(){
+            return undefined;
+        };
+
+        onExitCallback = function(){
             return undefined;
         };
 
         this.stashedEventListenerKeyword = stage;
         this.intro.oncomplete(() => {});
-        
-        if(!stage || stage === "start"){
 
+        if(!stage || stage === "start"){
             this.startTimer(this.tutorialDurationTimer);
             
             objects = [null,
                         document.getElementById("networkContainer")];
 
-            contents = ["In this step, we are going to measure the level of your prior knowledge in designing an Earth observation mission.",
+            contents = ["Before using iFEED to analyze a dataset, we are going to first measure the level of your prior knowledge "
+                        +"in designing an Earth observation mission.",
                         
                         "You will record information using an interactive graph, which displays different concepts and their relationships.",
 
                         "<p>The vertices in this graph represent concepts related to orbits and instruments. The edges represent the relations that connect different concepts.</p>"
                         +"<p>Note that the color of each concept represents its type (e.g. type of measurement, spectral region, altitude of an orbit, etc.).</p>",
 
-                        "You can move and highlight verticies by dragging the mouse. "+
-                        "This makes it easier to view verticies and their connections when the graph is cluttered.",
+                        "You can move and highlight vertices by dragging the mouse. "+
+                        "This makes it easier to view vertices and their connections when the graph is cluttered.",
 
                         "<p>Recording new information in this graph can be done in two ways:</p> "
-                        +"<p>1. Adding new relations</p>"
-                        +"<p>2. Adding new concepts</p>",
+                        +"<ol><li>Adding new relations</li>"
+                        +"<li>Adding new concepts</li></ol>",
 
                         "<p>To add a new relation, right-click on the graph display window, and click \"Add new relation\" option.</p>"
                         +"<p>(close this message and try selecting \"Add new relation\" option)</p>"];
-                        
-            callback = function(targetElement) {
+            
+            onChangeCallback = function(){
                 if(this._currentStep === 5){
-                    setAddNodeMode(false);
-                    setAddEdgeMode(false);
+                    that.conceptMap.setAddNodeMode(false);
+                    that.conceptMap.setAddEdgeMode(false);
                     that.eventListenerKeyword = "set_add_edge_mode";
-                    that.startTimedMessageGenerator("Right-click on the graph display, and select \"Add new relation\" option");
                 }
+            }
+
+            onExitCallback = function(targetElement) {
+                that.startTimedMessageGenerator("Right-click on the graph display, and select \"Add new relation\" option");
             }
 
         } else if(stage === "set_add_edge_mode"){
@@ -167,19 +194,20 @@ class Tutorial{
                         +"that there is a positive effect when you assign the instrument \"SAR_ALTIM\" to the orbit \"LEO-600-polar\".</p>",
 
                         "<p>The relation may also be negative, indicating that the two concepts do not go well together.</p>"
-                        +"<p>For example, a negative relation between \"VEG_LID\" and \"AERO_LID\" suggests that these two instruments "
-                        +"do not go well together when they are assigned to the same spacecraft</p>",
+                        +"<p>For example, a negative relation between \"VEG_LID\" and \"AERO_LID\" suggests that assigning these two instruments "
+                        +"to the same spacecraft negatively impacts the science benefit score, the cost, or both.</p>",
 
-                        "To add a new relation, you can simply drag the mouse from one concept node to another.",
-
-                        "<p>Now, try adding a new relation using drag and drop.<p>"
-                        +"<p>(close this message and try defining a new relation)</p>"];
+                        "<p>To add a new relation, you can simply drag the mouse from one concept node to another.</p>"
+                        +"<p>Try adding a new relation using drag and drop (close this message and try defining a new relation).<p>"];
             
-            callback = function(targetElement) {
-                if(this._currentStep === 4){
+            onChangeCallback = function(){
+                if(this._currentStep === 3){
                     that.eventListenerKeyword = "new_edge_added";
-                    that.startTimedMessageGenerator("Drag the mouse from one concept to another to define a new relation");
                 }
+            }
+
+            onExitCallback = function(targetElement) {
+                that.startTimedMessageGenerator("Drag the mouse from one concept to another to define a new relation");
             }
 
         } else if(stage === "new_edge_added"){
@@ -193,11 +221,10 @@ class Tutorial{
                         "<p>Next, you need to provide a number between 0 and 100 to specify the weight. "
                         +"The weight indicates the strength of the relation.</p>"
                         +"<p>For example, if assigning \"SAR_ALTIM\" to \"LEO-600-polar\" plays a very important role in improving the overall design, "
-                        +"the weight of 90 may be assigned. If the relation exists but the impact is small, then weight of 10 may be assigned. </p>",
-
-                        "After specifying the relation type and the weight, you can click the confirm button."];
+                        +"the weight of 90 may be assigned. If the relation exists but the impact is small, then weight of 10 may be assigned. </p>"
+                        +"<p>After specifying the relation type and the weight, you can click the confirm button.</p>"];
                         
-            callback = function(targetElement) {
+            onChangeCallback = function(targetElement) {
                 if(this._currentStep === 0){
                     // Remove iziToast overlay layer
                     d3.select('.iziToast-overlay.fadeIn').remove();
@@ -210,10 +237,13 @@ class Tutorial{
                     let body = document.querySelector('body');
                     body.appendChild(iziToastElement, body.childNodes[0]);
 
-                } else if(this._currentStep === 3){
+                } else if(this._currentStep === 2){
                     that.eventListenerKeyword = "new_edge_defined";
-                    that.startTimedMessageGenerator("Set the type of the relation and the weight, and click confirm button.");
                 }
+            }
+
+            onExitCallback = function(targetElement){
+                that.startTimedMessageGenerator("Set the type of the relation and the weight, and click confirm button."); 
             }
 
         } else if(stage === "new_edge_defined"){
@@ -230,21 +260,24 @@ class Tutorial{
 
             objects = [document.getElementById("networkContainer")];
 
-            contents = ["Note that a new edge is created in the graph, connecting two concepts.",
+            contents = ["Note that a new edge has been created in the graph, connecting two concepts.",
                         
-                        "<p>Now we will move on to the second way to record information, which is to add new concepts.</p>"
+                        "<p>Now we will move on to the second way of recording information, which is to add new concepts.</p>"
                         +"<p>When you cannot find the exact concept that you want to connect a relation to, you can define a new concept.</p>",
 
                         "<p>To add a new concept, right-click on the graph display window, and click \"Add new concept\" option.</p>"
                         +"<p>(close this message and try selecting \"Add new concept\" option)</p>"];
             
-            callback = function(targetElement) {
+            onChangeCallback = function(targetElement){
                 if(this._currentStep === 2){
-                    setAddNodeMode(false);
-                    setAddEdgeMode(false);
+                    that.conceptMap.setAddNodeMode(false);
+                    that.conceptMap.setAddEdgeMode(false);
                     that.eventListenerKeyword = "set_add_node_mode";
-                    that.startTimedMessageGenerator("Right-click on the graph display, and select \"Add new concept\" option");
                 }
+            }
+
+            onExitCallback = function(targetElement) {
+                that.startTimedMessageGenerator("Right-click on the graph display, and select \"Add new concept\" option");
             }
 
         } else if(stage === "set_add_node_mode"){
@@ -268,17 +301,19 @@ class Tutorial{
                         +"<p>Note that you cannot select concepts that are mutually exclusive or "
                         +"simple instances of orbits and instruments (e.g. SSO-600-DD, LEO-600-polar, AERO_POL, SAR_ALTIM)</p>",
 
-                        "To combine multiple concepts, first click the nodes to be combined. "
-                        +"Then, use the right-click to open a menu and select \"Confirm concept addition\"",
-
-                        "<p>Now, try adding a new concept by selecting multiple concept nodes.<p>"
-                        +"<p>(close this message and try defining a new concept)</p>"];
+                        "<p>To combine multiple concepts, first click the nodes to be combined. "
+                        +"Then use the right-click to open a menu and select \"Confirm concept addition\"</p>"
+                        +"<p>Try adding a new concept by selecting multiple concept nodes.</p>"
+                        +"<p>(close this message and define a new concept)</p>"];
             
-            callback = function(targetElement) {
-                if(this._currentStep === 3){
+            onChangeCallback = function(targetElement){
+                if(this._currentStep === 2){
                     that.eventListenerKeyword = "new_node_added";
-                    that.startTimedMessageGenerator("Select multiple nodes. Then, right-click to open a menu and select \"Confirm concept addition\"");
                 }
+            }
+
+            onExitCallback = function(targetElement) {
+                that.startTimedMessageGenerator("Select multiple nodes. Then, right-click to open a menu and select \"Confirm concept addition\"");
             }
 
         } else if(stage === "new_node_added"){
@@ -291,42 +326,79 @@ class Tutorial{
             return;
 
         } else if(stage === "new_node_added_after_delay"){
-            objects = [document.getElementById("networkContainer")];
+
+            objects = [document.getElementById("networkContainer"),
+                        null,
+                        document.getElementById("submitButton")];
 
             contents = ["After the new concept is added, you can hover the mouse over the node to view its label.",
 
-                        "<p>Now you will be given 10 minutes to record any positive or negative relations that you think may be present among the concepts provided.</p>"
-                        + "<p>Try to identify and record as many relations as you can based on your prior knowledge about designing an Earth observation mission.</p>"];
+                        "<p>We covered two different ways of recording information using the interactive graph:</p>"
+                        +"<ol><li>Adding new relations</li>"
+                        +"<li>Adding new concepts</li></ol>"
+                        +"<p>Now you will be given 10 minutes to record any positive or negative relations "
+                        +"that you think may be present among the concepts provided.</p>"
+                        + "<p>Try to identify and record as many relations as you can based on your prior knowledge "
+                        +"about designing an Earth observation mission.</p>",
+
+                        "<p>When you are finished, you can submit the graph by clicking this button and move on to the next "+
+                        "task.</p>"];
             
-            callback = function(targetElement) {
-                if(this._currentStep === 1){
-
-                    that.intro.oncomplete(() => { 
-                        setAddNodeMode(false);
-                        setAddEdgeMode(false);
-
-                        // Save the duration as a file
-                        that.stopTimer(that.tutorialDurationTimer);
-                        let filename = that.experiment.participantID + "-conceptMapTutorial.json";
-                        let durationInSeconds = that.tutorialDurationTimer.getTimeElapsed() / 1000;
-                        let out = {participantID: that.participantID, tutorialDuration: durationInSeconds};
-                        that.experiment.saveTextAsFile(filename, JSON.stringify(out));
-
-                        // Start the first task
-                        iziToast.info({
-                            title: "You are given 10 minutes to record as many relations as possible based on your prior knowledge.",
-                            message: '',
-                            position: 'topRight',
-                            timeout: 10000
-                        });
-                        that.experiment.startNextStage();
-                        d3.select("#tutorialButton").node().disabled = true;
-                    });
+            onChangeCallback = function(targetElement){
+                if(this._currentStep === 2){
+                    that.eventListenerKeyword = "final_page";
                 }
             }
-        } 
 
-        this.openIntroMessage(objects, contents, classname, callback);
+            onExitCallback = function(targetElement) {
+                that.conceptMap.setAddNodeMode(false);
+                that.conceptMap.setAddEdgeMode(false);
+
+                // Save the duration as a file
+                that.stopTimer(that.tutorialDurationTimer);
+                let filename = that.experiment.participantID + "-conceptMapTutorial.json";
+                let durationInSeconds = that.tutorialDurationTimer.getTimeElapsed() / 1000;
+                let out = {participantID: that.participantID, tutorialDuration: durationInSeconds};
+                that.experiment.saveTextAsFile(filename, JSON.stringify(out));
+
+                // Start the first task
+                iziToast.destroy();
+                iziToast.info({
+                    title: "Record as many relations as possible based on your prior knowledge",
+                    message: '',
+                    position: 'topRight',
+                    timeout: 10000
+                });
+                that.experiment.startNextStage();
+                d3.select("#tutorialButton").node().disabled = true;
+            }
+
+        } else if(stage === "learning_task"){
+
+            objects = [undefined];
+
+            contents = ["<p>In this step, you are asked to record any many positive or negative relations as possible, "
+                        +"based on the observations made from the data provided in the iFEED interface "
+                        +"(instead of relying on your prior knowledge).</p>",
+
+                        "<p>You will be given 30 minutes to use iFFED to analyze data and record the information.</p>"
+                        +"<p>After the 30-minute session, you will be asked to answer a series of questions on "
+                        +"designing an Earth observing satellite system in order to test how much you have learned during this session. </p>",
+                        
+                        "<p>As you answer the questions, you will have access to only the information you record in the current step.</p>"
+                        +"<p>Therefore, you are expected to solve the problems only relying on this information.</p>"
+                        +"<p>Try to record as many concepts and relations as possible.</p>"
+                        ];
+
+        } else if(stage === "problem_solving"){
+
+            objects = [document.getElementById("networkContainer")];
+
+            contents = ["<p>As you answer the questions, you may refer to the information you recorded in this graph interface.</p>",
+
+                        "<p>Note that you are not allowed to make any changes to the graph during this part of the experiment. </p>"];
+        }
+        this.openIntroMessage(objects, contents, classname, onChangeCallback, onExitCallback);
     }
 
     startTimedMessageGenerator(hintMessage){
@@ -334,6 +406,7 @@ class Tutorial{
         var duration = [];
         var d1 = 1 * 10 * 1000;
         var callback1 = () => {
+            iziToast.destroy();
             iziToast.info({
                 title: hintMessage,
                 message: '',
@@ -343,6 +416,7 @@ class Tutorial{
         };
         var d2 = 1 * 20 * 1000;
         var callback2 = () => {
+            iziToast.destroy();
             iziToast.info({
                 title: "If you are not sure how to continue, please ask the experimenter for help",
                 message: "",

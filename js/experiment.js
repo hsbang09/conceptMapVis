@@ -3,13 +3,15 @@ var exampleParticipantID = "0497289903001004819-5_21_10_45";
 
 class Experiment{
 
-    constructor(){
+    constructor(conceptMap){
+        this.conceptMap = conceptMap;
+
         this.participantID = null;
         // Experiment stages: 
         //      - 0: Concept mapping before any interaction
         //      - 1: Concept mapping during interaction
         //      - 2: Problem solving (no modifiication allowed)
-        this.experimentStage = -1; 
+        this.stage = -1; 
 
         let that = this;
         d3.selectAll('#submitButton').on('click', (d) => { 
@@ -29,20 +31,20 @@ class Experiment{
 
     startNextStage(){
         let that = this;
-        that.experimentStage += 1;
+        that.stage += 1;
         var callback = [];
         var duration = [];
         var timeLimitExists = false;
 
-        if(this.experimentStage === 0){
+        if(this.stage === 0){
             timeLimitExists = true;
 
             // remove all newly added edges and nodes
-            let edgesToRemove = newEdges.clear();
-            edges.remove(edgesToRemove);
+            let edgesToRemove = this.conceptMap.newEdges.clear();
+            this.conceptMap.edges.remove(edgesToRemove);
 
-            let nodesToRemove = newNodes.clear();
-            nodes.remove(nodesToRemove);
+            let nodesToRemove = this.conceptMap.newNodes.clear();
+            this.conceptMap.nodes.remove(nodesToRemove);
 
             var d1 = 8 * 60 * 1000;
             var callback1 = () => {
@@ -58,24 +60,28 @@ class Experiment{
             callback = [callback1, callback2];
             duration = [d1, d2];
 
-        }else if(this.experimentStage === 1){
+        }else if(this.stage === 1){
+            PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "learning_task");
+
             timeLimitExists = false;
 
             // remove all newly added edges and nodes
-            let edgesToRemove = newEdges.clear();
-            edges.remove(edgesToRemove);
+            let edgesToRemove = this.conceptMap.newEdges.clear();
+            this.conceptMap.edges.remove(edgesToRemove);
 
-            let nodesToRemove = newNodes.clear();
-            nodes.remove(nodesToRemove);
+            let nodesToRemove = this.conceptMap.newNodes.clear();
+            this.conceptMap.nodes.remove(nodesToRemove);
 
         }else{
+            PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "problem_solving");
+
             timeLimitExists = false;
 
             // Disable adding or modifying edges
-            setAddEdgeMode(false);
-            setAddNodeMode(false);
-            contextMenu = null;
-            document.getElementById('networkContainer').removeEventListener('contextmenu', contextMenuEventListener);
+            this.conceptMap.setAddEdgeMode(false);
+            this.conceptMap.setAddNodeMode(false);
+            this.conceptMap.contextMenu = null;
+            document.getElementById('networkContainer').removeEventListener('contextmenu', this.conceptMap.contextMenuEventListener);
             document.getElementById('networkContainer').addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 iziToast.warning({
@@ -110,19 +116,21 @@ class Experiment{
     }
 
     saveNetwork(){
+        let that = this;
+
         var out = {};
 
         out.participantID = this.participantID;
-        out.stage = this.experimentStage;
+        out.stage = this.stage;
 
         var timeElapsedInMiliSec = this.clock.getTimeElapsed();
         out.timeElapsed = timeElapsedInMiliSec / 1000;
 
         var edgesOut = [];
-        newEdges.forEach((d)=>{
+        this.conceptMap.newEdges.forEach((d) => {
             let edgeCopy = JSON.parse(JSON.stringify(d));
-            let fromNodeLabel = getNodeLabel(d.from);
-            let toNodeLabel = getNodeLabel(d.to);
+            let fromNodeLabel = that.conceptMap.getNodeLabel(d.from);
+            let toNodeLabel = that.conceptMap.getNodeLabel(d.to);
             edgeCopy.fromLabel = fromNodeLabel;
             edgeCopy.toLabel = toNodeLabel;
             edgeCopy.color = undefined;
@@ -131,16 +139,16 @@ class Experiment{
         out.edges = edgesOut;
 
         var nodesOut = [];
-        newNodes.forEach((d) => {
+        this.conceptMap.newNodes.forEach((d) => {
             var nodeCopy = JSON.parse(JSON.stringify(d));
             nodeCopy.connectedNodes = [];
 
-            edges.forEach((d) => {
+            that.conceptMap.edges.forEach((d) => {
                 let connectedNode = null;
                 if(d.from === nodeCopy.id){
-                    connectedNode = nodes.get(d.to);
+                    connectedNode = that.conceptMap.nodes.get(d.to);
                 }else if( d.to === nodeCopy.id){
-                    connectedNode = nodes.get(d.from);
+                    connectedNode = that.conceptMap.nodes.get(d.from);
                 }
                 if(connectedNode){
                     nodeCopy.connectedNodes.push(connectedNode);
@@ -150,7 +158,7 @@ class Experiment{
         })
         out.nodes = nodesOut;
 
-        var filename = this.participantID + "-" + this.experimentStage + ".json";
+        var filename = this.participantID + "-" + this.stage + ".json";
         this.saveTextAsFile(filename, JSON.stringify(out));
     }
 
@@ -236,7 +244,7 @@ class Experiment{
                         + "float: left;";
 
         var title, message, submitCallback;
-        if(this.experimentStage === -1){
+        if(this.stage === -1){
             title = "Copy and paste the participant ID";
             message = "(provided in the top-right corner of the tutorial page)";
             submitCallback = function (instance, toast, button, event, inputs) {
@@ -266,7 +274,7 @@ class Experiment{
                     that.participantID = inputParticipantID;
                     that.displayParticipantID(inputParticipantID);
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                    PubSub.publish(TUTORIAL_EVENT, "start");
+                    PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "start");
 
                 }else{
                     that.generateErrorMessage("Invalid participant ID. Please copy and paste the particpant ID from the tutorial page");

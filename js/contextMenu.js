@@ -2,14 +2,14 @@
 // Context info: node, depth, logic(AND or OR)
 
 class ContextMenu {   
-    constructor(network, nodes, edges, newNodes, newEdges, networkState){
-
-        this.network = network;
-        this.nodes = nodes;
-        this.edges = edges;
-        this.newNodes = newNodes;
-        this.newEdges = newEdges;
-        this.networkState = networkState;
+    constructor(conceptMap){
+        this.conceptMap = conceptMap;
+        this.network = conceptMap.network;
+        this.nodes = conceptMap.nodes;
+        this.edges = conceptMap.edges;
+        this.newNodes = conceptMap.newNodes;
+        this.newEdges = conceptMap.newEdges;
+        this.networkState = conceptMap.networkState;
         this.marginRatio = 0.13;
 
         this.contextItems = {
@@ -39,7 +39,7 @@ class ContextMenu {
 
     showMenu (event, context) {
 
-        var items = [];
+        let items = [];
         if(this.networkState.addNodeMode){
             items = items.concat(this.contextItems['addNodeMode']);
         }
@@ -222,28 +222,29 @@ class ContextMenu {
     }
     
     ContextMenuAction(context, option){
+        let that = this;
         switch(option) {
             case 'confirmNodeAddition':
-                if(selectedNodes.length < 2){
+                if(that.conceptMap.selectedNodes.length < 2){
                     displayWarning("At least two nodes must be selected to add new concept","");
                 }else{
-                    addNode();
+                    that.conceptMap.addNode();
                 }
                 break;
 
             case 'toggleAddNodeMode':
                 if(this.networkState.addNodeMode){
-                    setAddNodeMode(false);
+                    that.conceptMap.setAddNodeMode(false);
                 } else {
-                    setAddNodeMode(true);
+                    that.conceptMap.setAddNodeMode(true);
                 }
                 break;
 
             case 'toggleAddEdgeMode':
                 if(this.networkState.addEdgeMode){
-                    setAddEdgeMode(false);
+                    that.conceptMap.setAddEdgeMode(false);
                 } else {
-                    setAddEdgeMode(true);
+                    that.conceptMap.setAddEdgeMode(true);
                 }
                 break;
 
@@ -262,10 +263,10 @@ class ContextMenu {
             case 'modifyEdge':
                 var data = this.newEdges.get(context);
                 var callback = (d) => {
-                    edges.update(d);
-                    newEdges.update(d);
+                    that.edges.update(d);
+                    that.newEdges.update(d);
                 }
-                editEdge(data, callback);
+                that.conceptMap.editEdge(data, callback);
                 break;
 
             default:
