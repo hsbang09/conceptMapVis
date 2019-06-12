@@ -93,7 +93,7 @@ class Tutorial{
         }else{
             this.intro
                 .setOption('showButtons', true)
-                .setOption('showBullets', true);
+                .setOption('showBullets', false);
         }
         
         if(!classname){
