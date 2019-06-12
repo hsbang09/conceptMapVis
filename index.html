@@ -48,18 +48,14 @@
     var experiment = new Experiment(conceptMap);
     var tutorial = new Tutorial(conceptMap, experiment);
 
+    experiment.generateSignInMessage();
 
 
 
 
-    // experiment.generateSignInMessage();
-
-
-
-
-    experiment.participantID = exampleParticipantID;
-    experiment.displayParticipantID(experiment.participantID);
-    PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "start");
+    // experiment.participantID = exampleParticipantID;
+    // experiment.displayParticipantID(experiment.participantID);
+    // PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "start");
 
 
     // tutorial.setTutorialContent("start");

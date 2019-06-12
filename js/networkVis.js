@@ -2,6 +2,19 @@
 
 var instruments = ['OCE_SPEC', 'AERO_POL','SAR_ALTIM', 'VEG_INSAR', 'CPR_RAD', 'HYP_IMAG', 'OCE_SPEC',
                                 'HIRES_SOUND', 'VEG_LID', 'CHEM_SWIRSPEC', 'HYP_ERB', 'AERO_LID', 'CHEM_UVSPEC'];
+var instrumentDescription = ['Ocean color spectrometer',
+                            'Aerosol polarimeter',
+                            'Differential absorption lidar',
+                            'Short-wave / long-wave radiation budget',
+                            'Cloud and precipitation radar',
+                            'Polarimetric L-band SAR',
+                            'Vegetation/ice green lidar',
+                            'UV/VIS limb spectrometer',
+                            'SWIR nadir spectrometer',
+                            'SWIR-TIR hyperspectral imager',
+                            'IR atmospheric sounder',
+                            'Wide-swath radar altimeter'];
+
 var instrumentTypes = ['radar', 'lidar', 'imager'];
 var measurements = ['topography', 'atmosphericChem', 'oceanColor', 'cloud', 'atmHumidity', 'landCover', 
                     'soilMoisture', 'radiationBudget', 'vegetation', 'aerosol', 'seaSurfaceCurrent']
@@ -9,6 +22,12 @@ var spectralRegion = ['VNIR'];
 var illuminationCondition = ['active', 'passive'];
 var instrumentPower = ['highPower', 'lowPower'];
 var orbits = ['LEO-600-polar', 'SSO-600-AM', 'SSO-600-DD', 'SSO-800-DD', 'SSO-800-PM'];
+var orbitDescription = ['LEO with polar inclination at 600km altitude', 
+                            'SSO with morning LTAN at 600km altitude',
+                            'SSO with dawn-dusk LTAN at 600km altitude',
+                            'SSO with dawn-dusk LTAN at 800km altitude',
+                            'SSO with afternoon LTAN at 600km altitude'];
+
 var altitudes = ['600km', '800km'];
 var LTAN = ['AM', 'PM', 'dawn-dusk'];
 var orbitTypes = ['sun-synchronousOrbit', 'polarOrbit'];
@@ -62,6 +81,19 @@ class ConceptMap{
                     }
                 }
                 node.group = groupIndex;
+
+                let description = null;
+                if(instruments.indexOf(label) !== -1){
+                    let index = instruments.indexOf(label);
+                    description = "Instrument: " + instrumentDescription[index];
+                }else if(orbits.indexOf(label) !== -1){
+                    let index = orbits.indexOf(label);
+                    description = "Orbit:" + orbitDescription[index];
+                }
+
+                if(description){
+                    node.title = description;
+                }
             }
 
             // create a network
@@ -408,7 +440,8 @@ class ConceptMap{
                 .style('top', offset +'px')
                 .style('position', 'absolute')
                 .text('AddConceptMode: select multiple concept nodes to be combined')
-                .style('color', 'blue');
+                .style('color', 'blue')
+                .style('font-size','24px');
 
             d3.select('#networkContainer')
                 .style('border-color','#1F57BE')
@@ -442,7 +475,8 @@ class ConceptMap{
                 .style('top', offset +'px')
                 .style('position', 'absolute')
                 .text('AddRelationMode: define a new relation by dragging from one node to another node')
-                .style('color', 'green');
+                .style('color', 'green')
+                .style('font-size','24px');
 
             d3.select('#networkContainer')
                 .style('border-color','#0E8E1C')

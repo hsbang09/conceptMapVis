@@ -42,8 +42,10 @@ class Tutorial{
         this.intro.start();
 
         // Disable SKIP button until it reaches the last step
-        $('.introjs-skipbutton').hide();
-        this.intro.onafterchange(function(targetElement) {          
+        if(that.experiment.stage !== 1){
+            $('.introjs-skipbutton').hide();
+        }
+        this.intro.onafterchange(function(targetElement) {   
             if (this._introItems.length - 1 == this._currentStep || this._introItems.length == 1) {
                 $('.introjs-skipbutton').show();
             } 
@@ -66,6 +68,7 @@ class Tutorial{
         this.end();
         this.conceptMap.setAddNodeMode(false);
         this.conceptMap.setAddEdgeMode(false);
+
         // Start the first task
         iziToast.destroy();
         iziToast.info({
@@ -85,7 +88,7 @@ class Tutorial{
 
         if(messages.length === 1){
             this.intro
-                .setOption('showButtons', false)
+                .setOption('showButtons', true)
                 .setOption('showBullets', false);
         }else{
             this.intro
@@ -94,7 +97,7 @@ class Tutorial{
         }
         
         if(!classname){
-            classname = 'introJsTooltip';
+            classname = 'introJsTooltipLarge';
         }
         
         let steps = [];
@@ -376,18 +379,9 @@ class Tutorial{
         } else if(stage === "learning_task"){
 
             objects = [undefined];
-
-            contents = ["<p>In this step, you are asked to record any many positive or negative relations as possible, "
-                        +"based on the observations made from the data provided in the iFEED interface "
-                        +"(instead of relying on your prior knowledge).</p>",
-
-                        "<p>You will be given 30 minutes to use iFFED to analyze data and record the information.</p>"
-                        +"<p>After the 30-minute session, you will be asked to answer a series of questions on "
-                        +"designing an Earth observing satellite system in order to test how much you have learned during this session. </p>",
-                        
-                        "<p>As you answer the questions, you will have access to only the information you record in the current step.</p>"
-                        +"<p>Therefore, you are expected to solve the problems only relying on this information.</p>"
-                        +"<p>Try to record as many concepts and relations as possible.</p>"
+            contents = ["<p>Try to record as many positive or negative relations as possible "
+                        +"based on the observations you make from the data provided in the iFEED interface "
+                        +"(instead of relying on your prior knowledge).</p>"
                         ];
 
         } else if(stage === "problem_solving"){
@@ -397,6 +391,8 @@ class Tutorial{
             contents = ["<p>As you answer the questions, you may refer to the information you recorded in this graph interface.</p>",
 
                         "<p>Note that you are not allowed to make any changes to the graph during this part of the experiment. </p>"];
+
+
         }
         this.openIntroMessage(objects, contents, classname, onChangeCallback, onExitCallback);
     }

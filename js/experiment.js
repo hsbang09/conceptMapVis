@@ -24,7 +24,9 @@ class Experiment{
     }
 
     endStage(){
-        this.clock.stop();
+        if(this.clock){
+            this.clock.stop();
+        }
         this.saveNetwork();
         this.generateSignInMessage();
     }
@@ -62,7 +64,6 @@ class Experiment{
 
         }else if(this.stage === 1){
             PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "learning_task");
-
             timeLimitExists = false;
 
             // remove all newly added edges and nodes
@@ -74,8 +75,8 @@ class Experiment{
 
         }else{
             PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "problem_solving");
-
             timeLimitExists = false;
+            d3.select('#submitButton').node().disabled = true;
 
             // Disable adding or modifying edges
             this.conceptMap.setAddEdgeMode(false);
@@ -247,6 +248,7 @@ class Experiment{
         if(this.stage === -1){
             title = "Copy and paste the participant ID";
             message = "(provided in the top-right corner of the tutorial page)";
+
             submitCallback = function (instance, toast, button, event, inputs) {
                     
                 var inputParticipantID = inputs[0].value;
@@ -284,6 +286,7 @@ class Experiment{
         }else{
             title = "To continue, type in a passcode";
             message = "(Please ask the experimenter to provide the passcode)";
+
             submitCallback = function (instance, toast, button, event, inputs) {
 
                 var input = inputs[0].value;

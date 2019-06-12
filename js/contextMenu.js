@@ -174,7 +174,7 @@ class ContextMenu {
                 return d.text; 
             })
             .style('color', 'steelblue')
-            .style('font-size', '13px');
+            .style('font-size', '19px');
 
         // Remove context menu upon click
         d3.select('body')

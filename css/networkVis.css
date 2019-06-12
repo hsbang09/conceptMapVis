@@ -1,6 +1,6 @@
 #networkContainer {
 	width: 100%;
-	height: 600px;
+	height: 900px;
 	border: 1px solid lightgray;
 	position: relative;
 }
@@ -12,20 +12,20 @@
 
 #outputDiv > div {
 	margin: auto;
-	width: 300px;
+	width: 420px;
 }
 
 #tutorialButton {
-	width: 140px;
-	font-size: 13px;
+	width: 200px;
+	font-size: 18px;
 	margin-right: 10px;
 /*	position: relative;
 	left: 45%;*/
 }
 
 #submitButton {
-	width: 140px;
-	font-size: 13px;
+	width: 200px;
+	font-size: 18px;
 /*	position: relative;
 	left: 45%;*/
 }
