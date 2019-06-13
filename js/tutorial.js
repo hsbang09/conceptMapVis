@@ -44,10 +44,13 @@ class Tutorial{
         // Disable SKIP button until it reaches the last step
         if(that.experiment.stage !== 1){
             $('.introjs-skipbutton').hide();
+        }else{
+            d3.select('.introjs-button.introjs-skipbutton.introjs-donebutton').style('color','black');
         }
         this.intro.onafterchange(function(targetElement) {   
             if (this._introItems.length - 1 == this._currentStep || this._introItems.length == 1) {
                 $('.introjs-skipbutton').show();
+                d3.select('.introjs-button.introjs-skipbutton.introjs-donebutton').style('color','black');
             } 
 
             if(that.eventListenerKeyword === "final_page"){
@@ -372,8 +375,10 @@ class Tutorial{
                     position: 'topRight',
                     timeout: 10000
                 });
+
                 that.experiment.startNextStage();
                 d3.select("#tutorialButton").node().disabled = true;
+                that.intro.onexit(()=>{});
             }
 
         } else if(stage === "learning_task"){

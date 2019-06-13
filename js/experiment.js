@@ -159,7 +159,7 @@ class Experiment{
         })
         out.nodes = nodesOut;
 
-        var filename = this.participantID + "-" + this.stage + ".json";
+        var filename = this.participantID + "-conceptMap-"+ this.stage + ".json";
         this.saveTextAsFile(filename, JSON.stringify(out));
     }
 
@@ -288,7 +288,6 @@ class Experiment{
             message = "(Please ask the experimenter to provide the passcode)";
 
             submitCallback = function (instance, toast, button, event, inputs) {
-
                 var input = inputs[0].value;
                 if(input === "goseakers"){
                     that.startNextStage();
