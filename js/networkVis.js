@@ -1,7 +1,7 @@
 
 
-var instruments = ['OCE_SPEC', 'AERO_POL','SAR_ALTIM', 'VEG_INSAR', 'CPR_RAD', 'HYP_IMAG', 'OCE_SPEC',
-                                'HIRES_SOUND', 'VEG_LID', 'CHEM_SWIRSPEC', 'HYP_ERB', 'AERO_LID', 'CHEM_UVSPEC'];
+var instruments = ['OCE_SPEC','AERO_POL', 'AERO_LID', 'HYP_ERB', 'CPR_RAD', 'VEG_INSAR', 
+                'VEG_LID', 'CHEM_UVSPEC', 'CHEM_SWIRSPEC', 'HYP_IMAG','HIRES_SOUND','SAR_ALTIM'];
 var instrumentDescription = ['Ocean color spectrometer',
                             'Aerosol polarimeter',
                             'Differential absorption lidar',
@@ -12,15 +12,33 @@ var instrumentDescription = ['Ocean color spectrometer',
                             'UV/VIS limb spectrometer',
                             'SWIR nadir spectrometer',
                             'SWIR-TIR hyperspectral imager',
-                            'IR atmospheric sounder',
+                            'High resolution IR sounder',
                             'Wide-swath radar altimeter'];
 
 var instrumentTypes = ['radar', 'lidar', 'imager'];
-var measurements = ['topography', 'atmosphericChem', 'oceanColor', 'cloud', 'atmHumidity', 'landCover', 
-                    'soilMoisture', 'radiationBudget', 'vegetation', 'aerosol', 'seaSurfaceCurrent']
-var spectralRegion = ['VNIR'];
+var measurements = ['radiationBudget', 'atmosphericChem', 'atmosphericProp', 'aerosol', 'cloud', 'oceanColor', 'seaSurfaceProp', 
+                    'soilMoisture', 'glacierAndIce', 'vegetation', 'topography', 'landCover'];
+var measurementDescription = [
+                            'Downward long-wave irradiance at Earth surface, upward long-wave irradiance, etc.',
+                            'CH4, CO, CO2, O3, CFCs/HFCs, NOx-NO, NO2-, N2O5, HNO3, etc.',
+                            'Atmospheric humidity, wind speed & direction, air temperature at surface, etc.',
+                            'Aerosol height, optical depth, shape, composition, scattering properties, etc.',
+                            'Cloud top height, cloud droplet size, cloud cover, cloud ice, etc.',
+                            'Ocean color - Chlorophyll absorption and fluorescence, pigments, phytoplankton, etc.',
+                            'Sea level height, sea surface temperature, surface currents, wave height, etc.',
+                            'Soil moisture',
+                            'Glacier surface elevation, sea ice thinkness, snow cover, snow depth. etc.',
+                            'Vegetation type and structure, leaf area index, canopy density',
+                            'Topography',
+                            'Land use, land cover status'
+                            ];
+
+var spectralRegion = ['VNIR','UV','SWIR','MW','LWIR'];
+var spectralRegionDescription = ['Visible and near-infrared','Ultraviolet','Short-wave infrared','Microwave','Long-wave infrared'];
+
 var illuminationCondition = ['active', 'passive'];
 var instrumentPower = ['highPower', 'lowPower'];
+
 var orbits = ['LEO-600-polar', 'SSO-600-AM', 'SSO-600-DD', 'SSO-800-DD', 'SSO-800-PM'];
 var orbitDescription = ['LEO with polar inclination at 600km altitude', 
                             'SSO with morning LTAN at 600km altitude',
@@ -85,12 +103,17 @@ class ConceptMap{
                 let description = null;
                 if(instruments.indexOf(label) !== -1){
                     let index = instruments.indexOf(label);
-                    description = "Instrument: " + instrumentDescription[index];
-                }else if(orbits.indexOf(label) !== -1){
+                    description = instrumentDescription[index];
+                } else if(orbits.indexOf(label) !== -1){
                     let index = orbits.indexOf(label);
-                    description = "Orbit:" + orbitDescription[index];
+                    description = orbitDescription[index];
+                } else if(spectralRegion.indexOf(label) !== -1){
+                    let index = spectralRegion.indexOf(label);
+                    description = spectralRegionDescription[index];
+                } else if(measurements.indexOf(label) !== -1){
+                    let index = measurements.indexOf(label);
+                    description = measurementDescription[index];
                 }
-
                 if(description){
                     node.title = description;
                 }

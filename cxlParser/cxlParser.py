@@ -53,6 +53,7 @@ class CXLParser():
             dirname = '../visData'
 
         filepath = os.path.join(dirname, filename)
+        print('Exporting json file to {0}'.format(filepath))
 
         with open(filepath, 'w+') as outfile:  
             json.dump(out, outfile)
