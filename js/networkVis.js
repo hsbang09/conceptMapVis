@@ -68,7 +68,7 @@ class ConceptMap{
         let that = this;
 
         if(typeof seed === "undefined"){
-            seed = 392258;
+            seed = 596436;
         }
         this.seed = seed;
         this.data = null;
