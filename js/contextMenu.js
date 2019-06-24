@@ -14,34 +14,47 @@ class ContextMenu {
 
         this.contextItems = {
             'edge': [
-                {'value': 'removeEdge', 'text': 'Remove this relation'},
-                {'value': 'modifyEdge', 'text': 'Modify this relation'}
+                {'value': 'removeEdge', 'text': 'Remove relation'},
+                {'value': 'modifyEdge', 'text': 'Modify relation'}
             ],
             'node': [
-                {'value': 'removeNode', 'text': 'Remove this concept'}
+                {'value': 'removeNode', 'text': 'Remove concept'},
+                {'value': 'modifyNode', 'text': 'Modify concept'}
             ],
-            'addNodeMode':[
-                {'value':'confirmNodeAddition','text':'Confirm concept addition'}
+            'addEdgeMode':[
+                {'value':'addSelfReferenceEdge','text':'Create self-reference relation'}
             ],
             'default':[
-                {'value': 'toggleAddNodeMode', 'text': 'Add new concept'},
-                {'value': 'toggleAddEdgeMode', 'text': 'Add new relation'}
+                {'value': 'addNewNode', 'text': 'Add new concept'},
+                {'value': 'toggleAddEdgeMode', 'text': 'Add new relation'},
             ]
         };
 
         this.contextMenuSize = {
-            'default':{'`eight':null,
+            'default':{'weight':null,
                     'width':null,
                     'margin':0.15,
                     'scaled':false},
         };
     }    
 
-    showMenu (event, context) {
+    removeItem(items, keyword){
+        let index = -1;
+        for(let i = 0; i < items.length; i++){
+            if(items[i].value === keyword){
+                index = i;
+                break;
+            }
+        }
+        if(index !== -1){
+            items.splice(index,1);
+        }
+    }
 
+    showMenu (event, context) {
         let items = [];
-        if(this.networkState.addNodeMode){
-            items = items.concat(this.contextItems['addNodeMode']);
+        if(this.networkState.addEdgeMode){
+            items = items.concat(this.contextItems['addEdgeMode']);
         }
 
         let nodeID = null;
@@ -71,24 +84,11 @@ class ContextMenu {
         items = items.concat(this.contextItems['default']);
 
         // Remove illegal options
-        if(this.networkState.addNodeMode){
-            let index = -1;
-            for(let i = 0; i < items.length; i++){
-                if(items[i].value === 'toggleAddEdgeMode'){
-                    index = i;
-                    break;
-                }
+        if(this.networkState.addEdgeMode){
+            this.removeItem(items, 'addNewNode');
+            if(this.conceptMap.selectedNodes.length !== 1){
+                this.removeItem(items, 'addSelfReferenceEdge');
             }
-            items.splice(index,1);
-        }else if(this.networkState.addEdgeMode){
-            let index = -1;
-            for(let i = 0; i < items.length; i++){
-                if(items[i].value === 'toggleAddNodeMode'){
-                    index = i;
-                    break;
-                }
-            }
-            items.splice(index,1);
         }
         
         d3.select('.context-menu').remove();
@@ -150,23 +150,17 @@ class ContextMenu {
             .attr('y', function(d, i){ return y + (i * height); })
             .attr('width', width + 'px')
             .attr('height', height + 'px')
-            .style('padding-left','4px')
-            .style('padding-right', '4px')
-            .style('padding-top', '2px')
-            .style('padding-bottom', '2px')
+            .style('padding-left','6px')
+            .style('padding-right', '10px')
+            .style('padding-top', '4px')
+            .style('padding-bottom', '4px')
             .style('background-color', 'rgb(244,244,244)')
             .style('stroke', 'white')
             .style('stroke-width', '1px')
             .text((d) => { 
-                if(d.value === "toggleAddNodeMode") {
-                    if(this.networkState.addNodeMode){
-                        return 'Cancel concept addition';
-                    }else{
-                        return 'Add new concept';
-                    }
-                } else if(d.value === "toggleAddEdgeMode") {
+                if(d.value === "toggleAddEdgeMode") {
                     if(this.networkState.addEdgeMode){
-                        return 'Cancel relation addition';
+                        return 'Cancel adding new relation';
                     }else{
                         return 'Add new relation';
                     }
@@ -197,8 +191,6 @@ class ContextMenu {
                                     .attr('y', -1000)
                                     .attr('class', 'tempContextMenu')
                                     .text(function(d){ return d.text; });
-
-            // tempContextMenu.style(this.style.text);
                             
             let z = d3.selectAll('.tempContextMenu')
                         .nodes()
@@ -224,20 +216,19 @@ class ContextMenu {
     ContextMenuAction(context, option){
         let that = this;
         switch(option) {
-            case 'confirmNodeAddition':
-                if(that.conceptMap.selectedNodes.length < 2){
-                    displayWarning("At least two nodes must be selected to add new concept","");
-                }else{
-                    that.conceptMap.addNode();
-                }
+            case 'addNewNode':
+                that.conceptMap.addNewNode();
                 break;
 
-            case 'toggleAddNodeMode':
-                if(this.networkState.addNodeMode){
-                    that.conceptMap.setAddNodeMode(false);
-                } else {
-                    that.conceptMap.setAddNodeMode(true);
-                }
+            case 'modifyNode':
+                let nodeData = this.newNodes.get(context);
+                that.conceptMap.setNodeProperties(nodeData);
+                break;
+
+            case 'removeNode':
+                this.network.selectNodes([context]);
+                this.network.deleteSelected();
+                this.newNodes.remove(context);
                 break;
 
             case 'toggleAddEdgeMode':
@@ -248,10 +239,14 @@ class ContextMenu {
                 }
                 break;
 
-            case 'removeNode':
-                this.network.selectNodes([context]);
-                this.network.deleteSelected();
-                this.newNodes.remove(context);
+            case 'addSelfReferenceEdge':
+                let node = that.conceptMap.selectedNodes[0];
+                that.conceptMap.addNewEdge(node, node);
+                break;
+
+            case 'modifyEdge':
+                let edgeData = this.newEdges.get(context);
+                that.conceptMap.setEdgeProperties(edgeData);
                 break;
 
             case 'removeEdge':
@@ -259,16 +254,7 @@ class ContextMenu {
                 this.network.deleteSelected();
                 this.newEdges.remove(context);
                 break;
-
-            case 'modifyEdge':
-                var data = this.newEdges.get(context);
-                var callback = (d) => {
-                    that.edges.update(d);
-                    that.newEdges.update(d);
-                }
-                that.conceptMap.editEdge(data, callback);
-                break;
-
+                
             default:
                 break;
         }    

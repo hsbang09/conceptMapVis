@@ -1,8 +1,10 @@
+EDGE_LABEL_FONT_SIZE = 14;
 
+var ABSTRACT_CONCEPTS = ["Orbit", "Instrument"];
 
-var instruments = ['OCE_SPEC','AERO_POL', 'AERO_LID', 'HYP_ERB', 'CPR_RAD', 'VEG_INSAR', 
+var INSTRUMENTS = ['OCE_SPEC','AERO_POL', 'AERO_LID', 'HYP_ERB', 'CPR_RAD', 'VEG_INSAR', 
                 'VEG_LID', 'CHEM_UVSPEC', 'CHEM_SWIRSPEC', 'HYP_IMAG','HIRES_SOUND','SAR_ALTIM'];
-var instrumentDescription = ['Ocean color spectrometer',
+var INSTRUMENT_DESCRIPTION = ['Ocean color spectrometer',
                             'Aerosol polarimeter',
                             'Differential absorption lidar',
                             'Short-wave / long-wave radiation budget',
@@ -15,10 +17,10 @@ var instrumentDescription = ['Ocean color spectrometer',
                             'High resolution IR sounder',
                             'Wide-swath radar altimeter'];
 
-var instrumentTypes = ['radar', 'lidar', 'imager'];
-var measurements = ['radiationBudget', 'atmosphericChem', 'atmosphericProp', 'aerosol', 'cloud', 'oceanColor', 'seaSurfaceProp', 
+var INSTRUMENT_TYPES = ['radar', 'lidar', 'imager'];
+var MEASUREMENTS = ['radiationBudget', 'atmosphericChem', 'atmosphericProp', 'aerosol', 'cloud', 'oceanColor', 'seaSurfaceProp', 
                     'soilMoisture', 'glacierAndIce', 'vegetation', 'topography', 'landCover'];
-var measurementDescription = [
+var MEASUREMENT_DESCRIPTION = [
                             'Downward long-wave irradiance at Earth surface, upward long-wave irradiance, etc.',
                             'CH4, CO, CO2, O3, CFCs/HFCs, NOx-NO, NO2-, N2O5, HNO3, etc.',
                             'Atmospheric humidity, wind speed & direction, air temperature at surface, etc.',
@@ -33,35 +35,98 @@ var measurementDescription = [
                             'Land use, land cover status'
                             ];
 
-var spectralRegion = ['VNIR','UV','SWIR','MW','LWIR'];
-var spectralRegionDescription = ['Visible and near-infrared','Ultraviolet','Short-wave infrared','Microwave','Long-wave infrared'];
+var SPECTRAL_REGION = ['VNIR','UV','SWIR','MW','LWIR'];
+var SPECTRAL_REGION_DESCRIPTION = ['Visible and near-infrared','Ultraviolet','Short-wave infrared','Microwave','Long-wave infrared'];
 
-var illuminationCondition = ['active', 'passive'];
-var instrumentPower = ['highPower', 'lowPower'];
+var ILLUMINATION_CONDITION = ['active', 'passive'];
+var INSTRUMENT_POWER = ['highPower', 'lowPower'];
 
-var orbits = ['LEO-600-polar', 'SSO-600-AM', 'SSO-600-DD', 'SSO-800-DD', 'SSO-800-PM'];
-var orbitDescription = ['LEO with polar inclination at 600km altitude', 
+var ORBITS = ['LEO-600-polar', 'SSO-600-AM', 'SSO-600-DD', 'SSO-800-DD', 'SSO-800-PM'];
+var ORBIT_DESCRIPTION = ['LEO with polar inclination at 600km altitude', 
                             'SSO with morning LTAN at 600km altitude',
                             'SSO with dawn-dusk LTAN at 600km altitude',
                             'SSO with dawn-dusk LTAN at 800km altitude',
                             'SSO with afternoon LTAN at 600km altitude'];
 
-var altitudes = ['600km', '800km'];
+var ALTITUDES = ['600km', '800km'];
 var LTAN = ['AM', 'PM', 'dawn-dusk'];
-var orbitTypes = ['sun-synchronousOrbit', 'polarOrbit'];
+var ORBIT_TYPES = ['sun-synchronousOrbit', 'polarOrbit'];
 
-var groups = [instruments, instrumentTypes, measurements, spectralRegion, illuminationCondition, instrumentPower,
-                orbits, altitudes, LTAN, orbitTypes];
+var GROUPS = [
+    ABSTRACT_CONCEPTS, 
+    INSTRUMENTS, 
+    INSTRUMENT_TYPES, 
+    MEASUREMENTS, 
+    SPECTRAL_REGION, 
+    ILLUMINATION_CONDITION, 
+    INSTRUMENT_POWER,
+    ORBITS, 
+    ALTITUDES, 
+    LTAN, 
+    ORBIT_TYPES
+];
 
-var instrumentProperties = {"is": instrumentTypes,
-                            "measures": measurements,
-                            "operates in": spectralRegion,
-                            "has illumination condition": illuminationCondition,
-                            "requires": instrumentPower};
+var GROUP_LABELS = [
+    "abstractConcepts", 
+    "instruments", 
+    "instrumentTypes", 
+    "measurements", 
+    "spectralRegion", 
+    "illuminationCondition", 
+    "instrumentPower",
+    "orbits", 
+    "altitudes", 
+    "LTAN", 
+    "orbitTypes"
+];
 
-var orbitProperties = {"has altitude": altitudes,
-                        "has LTAN of": LTAN,
-                        "is": orbitTypes};
+var instrumentProperties = [INSTRUMENT_TYPES, MEASUREMENTS, SPECTRAL_REGION, ILLUMINATION_CONDITION, INSTRUMENT_POWER];
+var orbitProperties = [ALTITUDES, LTAN, ORBIT_TYPES];
+
+var LINK_LABELS = {
+    abstractConcepts: {
+        instruments: "is a class of",
+        orbits: "is a class of"
+    },
+    instruments: {
+        abstractConcepts: "is an instance of",
+        instrumentTypes: "is an instance of",
+        measurements: "measures",
+        spectralRegion: "operates in",
+        illuminationCondition: "has illumination type",
+        instrumentPower: "requires",
+    },
+    instrumentTypes: {
+        instruments: "is a class of",
+    }, 
+    measurements: {
+        instruments: "is measured by",
+    }, 
+    spectralRegion: {
+        instruments: "is the spectral region of",
+    },
+    illuminationCondition: {
+        instruments: "is the illumination type",
+    }, 
+    instrumentPower: {
+        instruments: "is required by",
+    },
+    orbits: {
+        abstractConcepts: "is an instance of",
+        altitudes: "has altitude of", 
+        LTAN: "has LTAN of", 
+        orbitTypes: "is an instance of",
+    }, 
+    altitudes: {
+        orbits: "is the altitude of",
+    }, 
+    LTAN: {
+        orbits: "is the LTAN of",
+    }, 
+    orbitTypes: {
+        orbits: "is a class of"
+    }
+};
 
 class ConceptMap{
     constructor(filename, seed){
@@ -80,19 +145,20 @@ class ConceptMap{
 
         this.contextMenu = null;
         this.contextMenuEventListener = null;
-        this.networkState = {addNodeMode: false, addEdgeMode: false}
+        this.networkState = {addEdgeMode: false};
         this.selectedNodes = [];
 
-        $.getJSON(filename, (d) => {
+        this.userGeneratedConceptGroup = GROUPS.length;
 
+        $.getJSON(filename, (d) => {
             this.data = d;
 
             for(let i = 0; i < this.data.nodes.length; i++){
                 let node = this.data.nodes[i];
                 let label = node.label;
                 let groupIndex = -1;
-                for(let j = 0; j < groups.length; j++){
-                    let thisGroup = groups[j];
+                for(let j = 0; j < GROUPS.length; j++){
+                    let thisGroup = GROUPS[j];
                     if(thisGroup.indexOf(label) != -1){
                         groupIndex = j;
                         break;
@@ -101,19 +167,23 @@ class ConceptMap{
                 node.group = groupIndex;
 
                 let description = null;
-                if(instruments.indexOf(label) !== -1){
-                    let index = instruments.indexOf(label);
-                    description = instrumentDescription[index];
-                } else if(orbits.indexOf(label) !== -1){
-                    let index = orbits.indexOf(label);
-                    description = orbitDescription[index];
-                } else if(spectralRegion.indexOf(label) !== -1){
-                    let index = spectralRegion.indexOf(label);
-                    description = spectralRegionDescription[index];
-                } else if(measurements.indexOf(label) !== -1){
-                    let index = measurements.indexOf(label);
-                    description = measurementDescription[index];
+                if(INSTRUMENTS.indexOf(label) !== -1){
+                    let index = INSTRUMENTS.indexOf(label);
+                    description = INSTRUMENT_DESCRIPTION[index];
+
+                } else if(ORBITS.indexOf(label) !== -1){
+                    let index = ORBITS.indexOf(label);
+                    description = ORBIT_DESCRIPTION[index];
+
+                } else if(SPECTRAL_REGION.indexOf(label) !== -1){
+                    let index = SPECTRAL_REGION.indexOf(label);
+                    description = SPECTRAL_REGION_DESCRIPTION[index];
+
+                } else if(MEASUREMENTS.indexOf(label) !== -1){
+                    let index = MEASUREMENTS.indexOf(label);
+                    description = MEASUREMENT_DESCRIPTION[index];
                 }
+
                 if(description){
                     node.title = description;
                 }
@@ -132,23 +202,15 @@ class ConceptMap{
                             inherit: false,
                         },
                         width: 1.2,
+                        font: {
+                            size: 0
+                        },
                     }, 
                     interaction:{
                         hover:true
                     },
                     manipulation: {
                         enabled: false,
-                        // addNode: function (data, callback) {
-                        //     // filling in the popup DOM elements
-                        //     console.log('add', data);
-                        // },
-                        // editNode: function (data, callback) {
-                        //     // filling in the popup DOM elements
-                        //     console.log('edit', data);
-                        // },
-                        addEdge: function (data, callback) {
-                            that.editEdge(data, callback);
-                        }
                     }
                 };
 
@@ -165,65 +227,99 @@ class ConceptMap{
 
             this.network = new vis.Network(container, inputData, options);
 
-            let nodeClickCallback = (params) => {
-                let nodeID = that.network.getNodeAt(params.pointer.DOM);
-                
-                if(that.networkState.addNodeMode){
-                    that.network.unselectAll();
-                    if(nodeID){
-                        let nodeData = that.nodes.get(nodeID);
-                        let label = nodeData.label;
-                        let types = identifyTypeOfConcept(label);
-                        if(types){
-                            let pass = true;
-                            for(let i = 0; i < that.selectedNodes.length; i++){
-                                let previouslySelected = that.nodes.get(that.selectedNodes[i]);
-                                let typesToCompare = identifyTypeOfConcept(previouslySelected.label);
+            let mouseInteractionCallback = (params) => {
 
-                                if(nodeID === previouslySelected.id){
-                                    displayWarning("Already selected", "");
-                                    pass = false;
-                                    break;
-                                }
-                                if(types[0] !== typesToCompare[0]){
-                                    displayWarning("Orbit properties and instrument properties cannot be used together to define a new concept", "");
-                                    pass = false;
-                                    break;
-                                }
-                                if(["measures", "operates in"].indexOf(typesToCompare[1]) === -1){
-                                    if(types[1] === typesToCompare[1]){
-                                        displayWarning("This property is mutually exclusive with one of the properties already selected", "");
-                                        pass = false;
-                                        break;
+                let isDraggingEvent = false;
+                if(params.event.type === "panstart"){
+                    isDraggingEvent = true;
+                }else if(params.event.type === "tap"){
+                    isDraggingEvent = false;
+                }
+
+                let nodeID = that.network.getNodeAt(params.pointer.DOM);
+
+                if(nodeID){ // A node is selected
+                    if(!that.networkState.addEdgeMode){
+                        that.selectedNodes = [nodeID];
+
+                        // Display the labels of all edges connected to the selected node if the event is not dragging
+                        if(!isDraggingEvent){
+                            let nodeLabel = that.nodes._data[nodeID].label;
+                            let edgeIds = that.edges.getIds();
+                            for(let i = 0; i < edgeIds.length; i++){
+                                let edgeToUpdate = {id: edgeIds[i], font: {}};
+
+                                if(params.edges.indexOf(edgeIds[i]) !== -1){ // The edge is connected to the selected node
+                                    let edge = that.edges._data[edgeIds[i]];
+                                    let otherNodeID;
+                                    let originalEdgeLabel = edge.label;
+                                    if(edge.from === nodeID){
+                                        otherNodeID = edge.to;
+                                    }else if(edge.to === nodeID){
+                                        otherNodeID = edge.from;
                                     }
+
+                                    if(originalEdgeLabel.indexOf("positive") !== -1 || originalEdgeLabel.indexOf("negative") !== -1){
+                                        // pass
+                                    }else if(otherNodeID){
+                                        let otherNodeLabel = that.nodes._data[otherNodeID].label;
+                                        let linkLabel = this.getLinkLabel(nodeLabel, otherNodeLabel);
+                                        if(linkLabel){
+                                            edgeToUpdate.label = linkLabel;
+                                        }
+                                    }
+                                    edgeToUpdate.font.size = EDGE_LABEL_FONT_SIZE;
+
+                                }else{
+                                    // For all edges not connected to the selected node, set font size to 0
+                                    edgeToUpdate.font.size = 0;
                                 }
-                            }
-                            if(pass){
-                                that.selectedNodes.push(nodeID);   
-                            }
-                        } else {
-                            if(that.newNodes.get(nodeID)){
-                                displayWarning("New concept can only be defined using pre-existing concepts","");
-                            }else{
-                                displayWarning("A property should be selected instead of a specific orbit/instrument instance to generate a new concept", "");
+                                that.edges.update(edgeToUpdate);
                             }
                         }
-                        that.network.selectNodes(that.selectedNodes);
-                    }else{
+
+                    } else if(that.networkState.addEdgeMode){
+                        if(that.selectedNodes.indexOf(nodeID) === -1){
+                            if(that.selectedNodes.length > 1){              
+                                displayWarning("Cannot select more than two concepts.", "");
+
+                            } else if(that.selectedNodes.length === 1) {
+                                that.selectedNodes.push(nodeID); 
+                                that.addNewEdge(that.selectedNodes[0], that.selectedNodes[1]);
+
+                            } else{
+                                that.selectedNodes.push(nodeID); 
+                                that.network.selectNodes(that.selectedNodes);
+                            }
+                        }
+                    }
+
+                } else {
+
+                    if(!isDraggingEvent){
+                        // De-select all nodes
                         that.selectedNodes = [];
+                        that.network.unselectAll();
+
+                        let edgeID = that.network.getEdgeAt(params.pointer.DOM);
+
+                        // Set the font size of all edges to 0, except for the selected edge (if there's any)
+                        let edgeIds = Object.keys(conceptMap.edges._data);
+                        for(let i = 0; i < edgeIds.length; i++){
+                            if(edgeID){
+                                if(edgeIds[i] === edgeID){
+                                    that.edges.update({id:edgeIds[i], font:{size: EDGE_LABEL_FONT_SIZE}});
+                                    continue;
+                                }
+                            }
+                            that.edges.update({id:edgeIds[i], font:{size:0}});
+                        }
                     }
                 }
             }
 
-            let nodeDragCallBack = function(params){        
-                if(that.networkState.addNodeMode){
-                    that.network.unselectAll();
-                    that.network.selectNodes(that.selectedNodes);
-                }
-            }
-
-            that.network.on("click", nodeClickCallback, false);
-            that.network.on("dragStart", nodeDragCallBack, false);
+            that.network.on("click", mouseInteractionCallback, false);
+            that.network.on("dragStart", mouseInteractionCallback, false);
 
             this.contextMenuEventListener = function(e) {
                 let coord = {x: e.layerX, y: e.layerY}
@@ -244,8 +340,6 @@ class ConceptMap{
 
             // Add new context menu
             container.addEventListener('contextmenu', this.contextMenuEventListener, false);
-
-            that.setAddEdgeMode(false);
         });
     }
 
@@ -257,69 +351,94 @@ class ConceptMap{
         return out;
     }
 
-    addNode(){
-        let nodeData = {id: null,
-                    group: null,
-                    label: null};
+    addNewNode(){
+        let nodeData = {id: this.generateRandomUniqueID(),
+                    group: this.userGeneratedConceptGroup,
+                    userDefined: true};
 
-        let edgeDataList = [];
-
-        let isOrbitProp = false;
-        let newID = this.generateRandomUniqueID();
-        let newLabel = "";
-        for(let i = 0; i < this.selectedNodes.length; i++){
-            let label = this.nodes.get(this.selectedNodes[i]).label;
-            let types = identifyTypeOfConcept(label);
-            let connector = types[1];
-            if(i === 0){
-                if(types[0] === 0){
-                    isOrbitProp = true;
-                    newLabel += "Orbit";
-                }else{
-                    isOrbitProp = false;
-                    newLabel += "Instrument";
-                }
-                newLabel += " that ";
-            }else{
-                newLabel += " AND ";
-            }
-            newLabel +=  connector + " " + label;
-
-            let edgeData = {id: this.generateRandomUniqueID(),
-                            from: this.selectedNodes[i],
-                            to: newID,
-                            label: null};
-            edgeDataList.push(edgeData);
-        }
-
-        nodeData.id = newID;
-        if(isOrbitProp){
-            nodeData.group = groups.length;
-        }else{
-            nodeData.group = groups.length + 1;
-        }
-        nodeData.title = newLabel;
-
-        // Add new node
-        this.nodes.add(nodeData);
-        this.newNodes.add(nodeData);
-
-        // Add edges connecting to the newly added node
-        for(let i = 0; i < edgeDataList.length; i++){
-            this.edges.add(edgeDataList[i]);
-        }
-        this.setAddNodeMode(false);
-
-        // EXPERIMENT
-        PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_node_added");
+        this.setNodeProperties(nodeData);
     }
 
-    editEdge(data, callback){
+    setNodeProperties(data){
+        let that = this;
+        let addingNewNode = true;
+        let initialLabel = null;
+
+        if(typeof data.label !== "undefined"){
+            addingNewNode = false;
+            initialLabel = data.label;
+        }
+
+        let title;
+        if(addingNewNode){
+            title = "Adding a new node";
+        }else{
+            title = "Modifying the node " + initialLabel;
+        }
+
+        let labelInput;
+        if(addingNewNode){
+            labelInput = '<input type="text">';
+
+        }else{
+            labelInput = '<input type="text" value="'+ initialLabel +'">';
+        }
+        
+        let buttonStyle = "width: 80px;" 
+                        + "margin-left: 10px"
+                        + "margin-right: 10px"
+                        + "float: left;";
+
+        iziToast.question({
+            drag: false,
+            timeout: false,
+            close: false,
+            overlay: true,
+            displayMode: 0,
+            id: 'question',
+            progressBar: false,
+            title: title,
+            message: 'Please type in the name of the new concept.',
+            position: 'center',
+            inputs: [
+                [labelInput, 'change', function (instance, toast, select, event) {}],
+            ],
+            buttons: [
+                ['<button id="iziToast_button_confirm" style="'+ buttonStyle +'"><b>Confirm</b></button>', function (instance, toast, button, event, inputs) {
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                    data.label = inputs[0].value;
+
+                    if(addingNewNode){
+                        that.nodes.add(data);
+                        that.newNodes.add(data);
+
+                    }else{
+                        that.nodes.update(data);
+                        that.newNodes.update(data);
+                    }
+                    
+                }, false], // true to focus
+
+                ['<button id="iziToast_button_cancel" style="'+ buttonStyle +'">Cancel</button>', function (instance, toast, button, e) {
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                }]
+            ],
+            onOpened: ()=> {},
+        });
+    }
+
+    addNewEdge(node1, node2){
+        let edgeData = {id: this.generateRandomUniqueID(), from: node1, to: node2, font: {size: EDGE_LABEL_FONT_SIZE}};
+        this.setEdgeProperties(edgeData);
+    }
+
+    setEdgeProperties(data){
         let that = this;
 
         let addingNewEdge = true;
         let initialWeight = null;
         let initialConnectionType = null;
+
         if(typeof data.label !== "undefined"){
             addingNewEdge = false;
             if(data.label.indexOf("positive") !== -1){
@@ -349,6 +468,7 @@ class ConceptMap{
                             + '</select>';
 
             weightInput = '<input type="number">';
+
         }else{
             if(initialConnectionType === "positive"){
                 linkTypeInput = '<select>'
@@ -425,9 +545,13 @@ class ConceptMap{
                     data.width = ((weight / 100) * 7) + 1; // max: 8, min: 1
 
                     if(addingNewEdge){
+                        that.edges.add(data);
                         that.newEdges.add(data);
+
+                    }else{
+                        that.edges.update(data);
+                        that.newEdges.update(data);
                     }
-                    callback(data);
                     that.setAddEdgeMode(false);
 
                     PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_edge_defined");
@@ -436,7 +560,6 @@ class ConceptMap{
 
                 ['<button id="iziToast_button_cancel" style="'+ buttonStyle +'">Cancel</button>', function (instance, toast, button, e) {
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                    that.network.disableEditMode();
                     that.setAddEdgeMode(false);
                 }]
             ],
@@ -446,46 +569,17 @@ class ConceptMap{
         });
     }
 
-    setAddNodeMode(flag){
-        this.selectedNodes = [];
-        this.network.unselectAll();
-        if(flag || typeof flag === 'undefined'){
-            this.setAddEdgeMode(false);
-            this.networkState.addNodeMode = true;
-            let container = document.getElementById('networkContainer');
-            let offset = 6;
-            // let x = container.offsetLeft + offset;
-            // let y = container.offsetTop + offset;
-            d3.select('#networkContainer')
-                .append('div')
-                .attr('id', 'networkEditModeDisplay')
-                .style('left', offset + 'px')
-                .style('top', offset +'px')
-                .style('position', 'absolute')
-                .text('AddConceptMode: select multiple concept nodes to be combined')
-                .style('color', 'blue')
-                .style('font-size','24px');
-
-            d3.select('#networkContainer')
-                .style('border-color','#1F57BE')
-                .style('border-width','2.5px');
-
-            PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "set_add_node_mode");
-        }else{
-            this.network.disableEditMode();
-            this.networkState.addNodeMode = false;
-            d3.select('#networkEditModeDisplay').remove();
-
-            d3.select('#networkContainer')
-                .style('border-color','#000000')
-                .style('border-width','0.8px');
-        }
-    }
-
     setAddEdgeMode(flag){
         if(flag || typeof flag === 'undefined'){
-            this.setAddNodeMode(false);
-            this.network.addEdgeMode();
+
+            if(this.selectedNodes.length > 2){
+                this.selectedNodes = [];
+                this.network.selectNodes([]);
+            } else if(this.selectedNodes.length === 2){
+                this.addNewEdge(this.selectedNodes[0], this.selectedNodes[1]);
+                return;
+            } 
+
             this.networkState.addEdgeMode = true;
             let container = document.getElementById('networkContainer');
             let offset = 6;
@@ -497,7 +591,7 @@ class ConceptMap{
                 .style('left', offset + 'px')
                 .style('top', offset +'px')
                 .style('position', 'absolute')
-                .text('AddRelationMode: define a new relation by dragging from one node to another node')
+                .text('AddRelationMode: define a new relation by selecting two nodes')
                 .style('color', 'green')
                 .style('font-size','24px');
 
@@ -506,11 +600,12 @@ class ConceptMap{
                 .style('border-width','2.5px');
 
             PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "set_add_edge_mode");
+
         }else{
-            this.network.disableEditMode();
+            this.selectedNodes = [];
+            this.network.selectNodes([]);
             this.networkState.addEdgeMode = false;
             d3.select('#networkEditModeDisplay').remove();
-
             d3.select('#networkContainer')
                 .style('border-color','#000000')
                 .style('border-width','0.8px');
@@ -532,44 +627,49 @@ class ConceptMap{
         })
         return out;
     }
-}
 
-function identifyTypeOfConcept(conceptLabel){
-    let propertyGroupConnector = null;
-    let isOrbitProp = false;
-    for(let prop in orbitProperties){
-        for(let j = 0; j < orbitProperties[prop].length; j++){
-            if(orbitProperties[prop][j] === conceptLabel){
-                isOrbitProp = true;
-                propertyGroupConnector = prop;
-                break;
-            }
-        }
-    }
-    let isInstrumentProp = false;
-    if(!isOrbitProp){
-        for(let prop in instrumentProperties){
-            for(let j = 0; j < instrumentProperties[prop].length; j++){
-                if(instrumentProperties[prop][j] === conceptLabel){
-                    isInstrumentProp = true;
-                    propertyGroupConnector = prop;
-                    break;
+    getLinkLabel(fromConceptLabel, toConceptLabel){
+        let fromGroup = this.getGroupLabel(fromConceptLabel);
+        let toGroup = this.getGroupLabel(toConceptLabel);
+
+        if(fromGroup === null || toGroup === null){
+            return null;
+
+        } else {
+            if(Object.keys(LINK_LABELS).indexOf(fromGroup) !== -1){
+                if(Object.keys(LINK_LABELS[fromGroup]).indexOf(toGroup) !== -1){
+                    return LINK_LABELS[fromGroup][toGroup];
                 }
             }
         }
+        return null;
     }
 
-    if(!isOrbitProp && !isInstrumentProp){
-        return null;
-    }else{
-        let out = [];
-        if(isOrbitProp){
-            out.push(0);
-        }else{
-            out.push(1);
+    getGroupLabel(label){
+        let groupIndex = null;
+        for(let i = 0; i < GROUPS.length; i++){
+            if(GROUPS[i].indexOf(label) !== -1){
+                groupIndex = i;
+            }
         }
-        out.push(propertyGroupConnector);
-        return out;
+        if(groupIndex !== null){
+            return GROUP_LABELS[groupIndex];
+        }
+        return null;
+    }
+
+    isInGroup(label, testGroup){
+        if(Array.isArray(testGroup[0])){
+            for(let i = 0; i < testGroup.length; i++){
+                if(this.isInGroup(label, testGroup[i])){
+                    return true;
+                }
+            }
+            return false;
+
+        } else {
+            return testGroup.indexOf(label) !== -1;
+        }
     }
 }
 

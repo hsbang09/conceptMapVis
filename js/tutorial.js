@@ -278,7 +278,7 @@ class Tutorial{
                 if(this._currentStep === 2){
                     that.conceptMap.setAddNodeMode(false);
                     that.conceptMap.setAddEdgeMode(false);
-                    that.eventListenerKeyword = "set_add_node_mode";
+                    that.eventListenerKeyword = "set_combine_node_mode";
                 }
             }
 
@@ -286,16 +286,16 @@ class Tutorial{
                 that.startTimedMessageGenerator("Right-click on the graph display, and select \"Add new concept\" option");
             }
 
-        } else if(stage === "set_add_node_mode"){
+        } else if(stage === "set_combine_node_mode"){
             this.intro.exit();
             this.stopTimer();
             var delayInMilliseconds = 1500; // 1.5 second delay
             setTimeout(function() {
-                that.setTutorialContent("set_add_node_mode_after_delay");
+                that.setTutorialContent("set_combine_node_mode_after_delay");
             }, delayInMilliseconds);
             return;
 
-        } else if(stage === "set_add_node_mode_after_delay"){
+        } else if(stage === "set_combine_node_mode_after_delay"){
             objects = [document.getElementById("networkEditModeDisplay"),
                         document.getElementById("networkContainer")];
 

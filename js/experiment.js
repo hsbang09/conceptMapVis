@@ -319,6 +319,56 @@ class Experiment{
             ],
         });
     }
+
+
+    importUserGeneratedNetwork(filename){
+        let that = this;
+        $.getJSON(filename, (d) => {
+            let userGeneratedEdges = d.edges;
+            let userGeneratedNodes = d.nodes;
+
+            that.conceptMap.nodes.add(userGeneratedNodes);
+            that.conceptMap.newNodes.add(userGeneratedNodes);
+
+            let edgeConnectingNewNodes = [];
+            for(let i = 0; i < userGeneratedNodes.length; i++){
+                let node = userGeneratedNodes[i];
+                let connectedNodes = node.connectedNodes;
+
+                for(let j = 0; j < connectedNodes.length; j++){
+                    edgeConnectingNewNodes.push({
+                        from: node.id,
+                        to: connectedNodes[j].id,
+                    });
+                }
+            }
+            that.conceptMap.edges.add(edgeConnectingNewNodes);
+
+
+            for(let i = 0; i < userGeneratedEdges.length; i++){
+                let edge = userGeneratedEdges[i];
+
+                if(edge.label.indexOf("positive") !== -1){
+                    edge.color = { 
+                        color: '#25CF37',
+                        highlight: '#25CF37',
+                        hover: '#25CF37'
+                    }
+                }else if(edge.label.indexOf("negative") !== -1){
+                    edge.color = { 
+                        color: '#FF2222',
+                        highlight: '#FF2222',
+                        hover: '#FF2222'
+                    };
+                }
+                if(edge.weight){
+                    edge.width = ((edge.weight / 100) * 7) + 1; // max: 8, min: 1
+                }
+                that.conceptMap.edges.add(edge);
+                that.conceptMap.newEdges.add(edge);
+            }
+        })
+    }
 }
 
 class Clock{

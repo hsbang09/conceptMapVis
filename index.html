@@ -43,12 +43,16 @@
 
   <script type="text/javascript">
 
-    var conceptMap = new ConceptMap("visData/ClimateCentric-6.json");
+    var conceptMap = new ConceptMap("data/visData/ClimateCentric-6.json");
 
     var experiment = new Experiment(conceptMap);
     var tutorial = new Tutorial(conceptMap, experiment);
 
-    experiment.generateSignInMessage();
+
+    // experiment.importUserGeneratedNetwork("data/experimentSaveData/9302789648000004819-6_17_10_6-conceptMap-1.json");
+    // experiment.importUserGeneratedNetwork("data/experimentSaveData/9214032375002004819-6_12_20_3-conceptMap-1.json");
+    
+    // experiment.generateSignInMessage();
 
 
 
