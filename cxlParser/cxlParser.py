@@ -8,7 +8,7 @@ class CXLParser():
     def __init__(self, filepath):
 
         if os.path.dirname(filepath) == '':
-            filepath = os.path.join('../cxl', filepath)
+            filepath = os.path.join('../data/cxl', filepath)
 
         if not os.path.isfile(filepath):
             raise ValueError('{0} not a file'.format(filepath))
@@ -50,7 +50,7 @@ class CXLParser():
             filename = filename + ".json"
 
         if dirname is None:
-            dirname = '../visData'
+            dirname = '../data/visData'
 
         filepath = os.path.join(dirname, filename)
         print('Exporting json file to {0}'.format(filepath))

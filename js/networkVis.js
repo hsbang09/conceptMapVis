@@ -281,7 +281,7 @@ class ConceptMap{
                     } else if(that.networkState.addEdgeMode){
                         if(that.selectedNodes.indexOf(nodeID) === -1){
                             if(that.selectedNodes.length > 1){              
-                                displayWarning("Cannot select more than two concepts.", "");
+                                displayWarning("Cannot select more than two concepts to dfine a new relation.", "");
 
                             } else if(that.selectedNodes.length === 1) {
                                 that.selectedNodes.push(nodeID); 
@@ -352,6 +352,9 @@ class ConceptMap{
     }
 
     addNewNode(){
+        // EXPERIMENT
+        PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "add_new_node");
+
         let nodeData = {id: this.generateRandomUniqueID(),
                     group: this.userGeneratedConceptGroup,
                     userDefined: true};
@@ -412,6 +415,9 @@ class ConceptMap{
                         that.nodes.add(data);
                         that.newNodes.add(data);
 
+                        // EXPERIMENT
+                        PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_node_added");
+
                     }else{
                         that.nodes.update(data);
                         that.newNodes.update(data);
@@ -438,15 +444,16 @@ class ConceptMap{
         let addingNewEdge = true;
         let initialWeight = null;
         let initialConnectionType = null;
+        let initialConnectionName = null;
 
         if(typeof data.label !== "undefined"){
             addingNewEdge = false;
-            if(data.label.indexOf("positive") !== -1){
-                initialConnectionType = "positive";
-            }else if(data.label.indexOf("negative") !== -1){
-                initialConnectionType = "negative";
-            }
+            initialConnectionType = data.label.split("(")[0].trim();
 
+            if(initialConnectionType.indexOf("negative") === -1 && initialConnectionType.indexOf("positive") === -1){
+                initialConnectionName = initialConnectionType;
+            }
+        
             if(data.weight){
                 initialWeight = data.weight;
             }
@@ -459,46 +466,99 @@ class ConceptMap{
             title = "Modifying the relation between " + this.getNodeLabel(data.from) + " and " + this.getNodeLabel(data.to) + "\n";
         }
 
-        let linkTypeInput, weightInput;
-        if(addingNewEdge){
-            linkTypeInput = '<select>'
-                                + '<option value="select"> Select </option>'
-                                + '<option value="positive"> positive </option>'
-                                + '<option value="negative"> negative </option>'
-                            + '</select>';
+        let connectionTypeSelectID = "relation_input_type";
+        let connectionTypeOtherID = "relation_input_type_other";
+        let connectionWeightID = "relation_input_weight";
 
-            weightInput = '<input type="number">';
-
-        }else{
-            if(initialConnectionType === "positive"){
-                linkTypeInput = '<select>'
-                                + '<option value="positive" selected> positive </option>'
-                                + '<option value="negative"> negative </option>'
-                            + '</select>';
-            }else if(initialConnectionType === "negative"){
-                linkTypeInput = '<select>'
-                                + '<option value="positive"> positive </option>'
-                                + '<option value="negative" selected> negative </option>'
-                            + '</select>';
-            }
-            weightInput = '<input type="number" value="'+ initialWeight +'">';
-        }
         
         let buttonStyle = "width: 80px;" 
                         + "margin-left: 10px"
                         + "margin-right: 10px"
                         + "float: left;";
 
+        let inputFieldStyle = "margin-left: 10px"
+                        + "margin-right: 10px";
+
+        let linkTypeInput, weightInput;
+        if(addingNewEdge){
+            linkTypeInput = '<select id="'+ connectionTypeSelectID +'">'
+                                + '<option value="select"> Select </option>'
+                                + '<option value="positive"> positive </option>'
+                                + '<option value="negative"> negative </option>'
+                                + '<option value="other"> other (type in the name) </option>'
+                            + '</select>';
+            weightInput = '<input style="'+ inputFieldStyle +'" id="'+ connectionWeightID +'" type="number">';
+
+        }else{
+            if(initialConnectionType === "positive"){
+                linkTypeInput = '<select id="'+ connectionTypeSelectID +'">'
+                                + '<option value="positive" selected> positive </option>'
+                                + '<option value="negative"> negative </option>'
+                                + '<option value="other"> other (type in the name) </option>'
+                            + '</select>';
+            }else if(initialConnectionType === "negative"){
+                linkTypeInput = '<select id="'+ connectionTypeSelectID +'">'
+                                + '<option value="positive"> positive </option>'
+                                + '<option value="negative" selected> negative </option>'
+                                + '<option value="other"> other (type in the name) </option>'
+                            + '</select>';
+            }else{
+                linkTypeInput = '<select id="'+ connectionTypeSelectID +'">'
+                                + '<option value="positive"> positive </option>'
+                                + '<option value="negative"> negative </option>'
+                                + '<option value="other" selected> other (type in the name) </option>'
+                            + '</select>';
+                linkTypeInput = linkTypeInput + '<input style="'+ inputFieldStyle +'" id="'+ connectionTypeOtherID +'" type="text" value="'+ initialConnectionName +'">';
+            }
+            weightInput = '<input style="'+ inputFieldStyle +'" id="'+ connectionWeightID +'" type="number" value="'+ initialWeight +'">';
+        }
+
         let inputCallback = function(){
-            let inputs = d3.selectAll(".iziToast-inputs-child.revealIn").nodes();
-            let connectionType = inputs[0].value;
-            let weight = inputs[1].value;
+            let connectionType = d3.select('#'+connectionTypeSelectID).node().value;
+            let connectionName = null;
+            let connectionNameInputAbsent = true;
+            if(d3.select('#'+connectionTypeOtherID).node()){
+                connectionNameInputAbsent = false;
+                connectionName = d3.select('#'+connectionTypeOtherID).node().value;
+            }
+            let connectionWeight = d3.select('#'+connectionWeightID).node().value;
+
+            if(connectionType === "other" && connectionNameInputAbsent){
+                d3.select('.iziToast-inputs')
+                    .insert('input', 'select + *')
+                    .attr('id', connectionTypeOtherID)
+                    .style('margin-left','10px')
+                    .style('margin-right','10px')
+                    .attr('type','text')
+                    .on('change', ()=>{
+                        inputCallback();
+                    });
+
+            }else if(connectionType !== "other"){
+                d3.select('#relation_input_type_other').remove();
+            }
+
+            let validInput = true;
+            if(connectionType === "select"){
+                validInput = false;
+            }
+
+            if(connectionWeight === "" || parseInt(connectionWeight) < 0 || parseInt(connectionWeight) > 100){
+                validInput = false;
+            }
+
+            if(connectionType === "other"){
+                if(!connectionName){
+                    validInput = false;
+                }
+            }
 
             let confirmButton = d3.select("#iziToast_button_confirm");
-            if(connectionType !== "select" && weight !== "" && parseInt(weight) >= 0 && parseInt(weight) <= 100){
+            if(validInput){
                 // Activate confirm button                    
                 confirmButton.node().disabled = false;
                 confirmButton.select('b').style("opacity", "1.0");
+
             } else {
                 let confirmButton = d3.select("#iziToast_button_confirm");
                 confirmButton.node().disabled = true;
@@ -515,7 +575,7 @@ class ConceptMap{
             id: 'question',
             progressBar: false,
             title: title,
-            message: 'Please select the relation type and the corresponding weight (0-100)',
+            message: 'Please set the relation type and the corresponding weight (0-100)',
             position: 'center',
             inputs: [
                 [linkTypeInput, 'change', function (instance, toast, select, event) {
@@ -528,11 +588,23 @@ class ConceptMap{
             buttons: [
                 ['<button id="iziToast_button_confirm" disabled style="'+ buttonStyle +'"><b style="opacity: 0.05">Confirm</b></button>', function (instance, toast, button, event, inputs) {
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                    let connectionType = inputs[0].options[inputs[0].selectedIndex].value;
-                    let weight = inputs[1].value;
-                    data.label = connectionType + " (" + weight + ")";
-                    data.weight = weight;
 
+                    let connectionType = d3.select('#'+connectionTypeSelectID).node().value;
+                    let connectionName = null;
+                    if(d3.select('#'+connectionTypeOtherID).node()){
+                        connectionName = d3.select('#'+connectionTypeOtherID).node().value;
+                    }
+                    let connectionWeight = d3.select('#'+connectionWeightID).node().value;
+
+                    if(connectionName){
+                        data.label = connectionName + " (" + connectionWeight + ")";
+                        data.weight = connectionWeight;
+
+                    }else{
+                        data.label = connectionType + " (" + connectionWeight + ")";
+                        data.weight = connectionWeight;
+                    }
+                    
                     if(connectionType === "positive"){
                         data.color = { color: '#25CF37',
                                         highlight: '#25CF37',
@@ -541,21 +613,29 @@ class ConceptMap{
                         data.color = { color: '#FF2222',
                                         highlight: '#FF2222',
                                         hover: '#FF2222'};
+                    }else if(connectionType === "other"){
+                        data.color = { color: '#A825CF',
+                                        highlight: '#A825CF',
+                                        hover: '#A825CF'};
                     }
-                    data.width = ((weight / 100) * 7) + 1; // max: 8, min: 1
+                    data.width = ((+connectionWeight / 100) * 7) + 1; // max: 8, min: 1
 
                     if(addingNewEdge){
                         that.edges.add(data);
                         that.newEdges.add(data);
-
                     }else{
                         that.edges.update(data);
                         that.newEdges.update(data);
                     }
                     that.setAddEdgeMode(false);
 
-                    PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_edge_defined");
-
+                    // EXPERIMENT
+                    if(connectionType === "other"){
+                        PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_edge_defined_other");
+                    }else{
+                        PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_edge_defined");
+                    }
+                    
                 }, false], // true to focus
 
                 ['<button id="iziToast_button_cancel" style="'+ buttonStyle +'">Cancel</button>', function (instance, toast, button, e) {
@@ -564,6 +644,7 @@ class ConceptMap{
                 }]
             ],
             onOpened: ()=> {
+                // EXPERIMENT
                 PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_edge_added");
             },
         });
@@ -599,6 +680,7 @@ class ConceptMap{
                 .style('border-color','#0E8E1C')
                 .style('border-width','2.5px');
 
+            // EXPERIMENT
             PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "set_add_edge_mode");
 
         }else{

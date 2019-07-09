@@ -80,7 +80,6 @@ class Experiment{
 
             // Disable adding or modifying edges
             this.conceptMap.setAddEdgeMode(false);
-            this.conceptMap.setAddNodeMode(false);
             this.conceptMap.contextMenu = null;
             document.getElementById('networkContainer').removeEventListener('contextmenu', this.conceptMap.contextMenuEventListener);
             document.getElementById('networkContainer').addEventListener('contextmenu', (e) => {
@@ -119,29 +118,29 @@ class Experiment{
     saveNetwork(){
         let that = this;
 
-        var out = {};
-
+        let out = {};
         out.participantID = this.participantID;
         out.stage = this.stage;
 
-        var timeElapsedInMiliSec = this.clock.getTimeElapsed();
+        let timeElapsedInMiliSec = this.clock.getTimeElapsed();
         out.timeElapsed = timeElapsedInMiliSec / 1000;
 
-        var edgesOut = [];
+        let edgesOut = [];
         this.conceptMap.newEdges.forEach((d) => {
             let edgeCopy = JSON.parse(JSON.stringify(d));
             let fromNodeLabel = that.conceptMap.getNodeLabel(d.from);
             let toNodeLabel = that.conceptMap.getNodeLabel(d.to);
             edgeCopy.fromLabel = fromNodeLabel;
             edgeCopy.toLabel = toNodeLabel;
+            edgeCopy.width = undefined;
             edgeCopy.color = undefined;
             edgesOut.push(edgeCopy);
         })
         out.edges = edgesOut;
 
-        var nodesOut = [];
+        let nodesOut = [];
         this.conceptMap.newNodes.forEach((d) => {
-            var nodeCopy = JSON.parse(JSON.stringify(d));
+            let nodeCopy = JSON.parse(JSON.stringify(d));
             nodeCopy.connectedNodes = [];
 
             that.conceptMap.edges.forEach((d) => {
@@ -152,14 +151,16 @@ class Experiment{
                     connectedNode = that.conceptMap.nodes.get(d.from);
                 }
                 if(connectedNode){
-                    nodeCopy.connectedNodes.push(connectedNode);
+                    let connectedNodeCopy = JSON.parse(JSON.stringify(connectedNode));
+                    connectedNodeCopy.group = undefined;
+                    nodeCopy.connectedNodes.push(connectedNodeCopy);
                 }
             })
             nodesOut.push(nodeCopy);
         })
         out.nodes = nodesOut;
 
-        var filename = this.participantID + "-conceptMap-"+ this.stage + ".json";
+        let filename = this.participantID + "-conceptMap-"+ this.stage + ".json";
         this.saveTextAsFile(filename, JSON.stringify(out));
     }
 
@@ -319,8 +320,7 @@ class Experiment{
             ],
         });
     }
-
-
+    
     importUserGeneratedNetwork(filename){
         let that = this;
         $.getJSON(filename, (d) => {

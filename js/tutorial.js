@@ -92,11 +92,11 @@ class Tutorial{
         if(messages.length === 1){
             this.intro
                 .setOption('showButtons', true)
-                .setOption('showBullets', false);
+                .setOption('showBullets', true);
         }else{
             this.intro
                 .setOption('showButtons', true)
-                .setOption('showBullets', false);
+                .setOption('showBullets', true);
         }
         
         if(!classname){
@@ -170,7 +170,6 @@ class Tutorial{
             
             onChangeCallback = function(){
                 if(this._currentStep === 5){
-                    that.conceptMap.setAddNodeMode(false);
                     that.conceptMap.setAddEdgeMode(false);
                     that.eventListenerKeyword = "set_add_edge_mode";
                 }
@@ -183,7 +182,7 @@ class Tutorial{
         } else if(stage === "set_add_edge_mode"){
             this.intro.exit();
             this.stopTimer();
-            var delayInMilliseconds = 1500; // 1.5 second delay
+            var delayInMilliseconds = 1200; // 1.2 second delay
             setTimeout(function() {
                 that.setTutorialContent("set_add_edge_mode_after_delay");
             }, delayInMilliseconds);
@@ -193,7 +192,7 @@ class Tutorial{
             objects = [document.getElementById("networkEditModeDisplay"),
                         document.getElementById("networkContainer")];
 
-            contents = ["Now we are in AddRelationMode. Whenever you enter this mode, this message will appear in order to indicate the current interaction mode.",
+            contents = ["Now we are in AddRelationMode. Whenever you enter this mode, this message will appear in order to indicate the current mode.",
 
                         "<p>You can define new relations to indicate whether different pairs of concepts have positive or negative relationships.</p>"
                         +"<p>For example, you can make a new relation connecting two concepts \"SAR_ALTIM\" and \"LEO-600-polar\" to indicate "
@@ -203,8 +202,8 @@ class Tutorial{
                         +"<p>For example, a negative relation between \"VEG_LID\" and \"AERO_LID\" suggests that assigning these two instruments "
                         +"to the same spacecraft negatively impacts the science benefit score, the cost, or both.</p>",
 
-                        "<p>To add a new relation, you can simply drag the mouse from one concept node to another.</p>"
-                        +"<p>Try adding a new relation using drag and drop (close this message and try defining a new relation).<p>"];
+                        "<p>To add a new relation, you can simply click the two concepts to be connected.</p>"
+                        +"<p>To continue, define a new relation by clicking two concepts (close this message and try defining a new relation).<p>"];
             
             onChangeCallback = function(){
                 if(this._currentStep === 3){
@@ -213,7 +212,7 @@ class Tutorial{
             }
 
             onExitCallback = function(targetElement) {
-                that.startTimedMessageGenerator("Drag the mouse from one concept to another to define a new relation");
+                that.startTimedMessageGenerator("Select two different concepts to define a new relation");
             }
 
         } else if(stage === "new_edge_added"){
@@ -266,8 +265,73 @@ class Tutorial{
 
             objects = [document.getElementById("networkContainer")];
 
-            contents = ["Note that a new edge has been created in the graph, connecting two concepts.",
+            contents = ["Note that a new edge has been created in the graph, connecting the selected concepts.",
                         
+                        "<p>While 'positive' and 'negative' relations are given as default options, you can also define any custom relation.</p>",
+
+                        ""
+                        ];
+            
+            onChangeCallback = function(){
+                if(this._currentStep === 2){
+
+                    that.intro.exit();
+                    that.conceptMap.addNewEdge("1TQGJ4LG6-23GQ00G-B97", "1TJFRJB1X-VZ3MV4-76L");
+
+                    let delayInMilliseconds = 1000; // 1.5 second delay
+                    setTimeout(function() {
+                        // Remove iziToast overlay layer
+                        d3.select('.iziToast-overlay.fadeIn').remove();
+
+                        // Get iziToast element
+                        let iziToastElement = document.querySelector('.iziToast-capsule');
+                        iziToastElement.parentNode.removeChild(iziToastElement);
+
+                        // Re-insert the iziToast element
+                        let body = document.querySelector('body');
+                        body.appendChild(iziToastElement, body.childNodes[0]);
+
+                        setTimeout(function() {
+                            that.setTutorialContent("new_edge_added_2");
+                        }, 700);  // 0.7 second delay
+
+                    }, delayInMilliseconds);                
+                }
+            }
+
+            onExitCallback = function(targetElement) {
+            }
+
+        }else if(stage === "new_edge_added_2"){
+
+            objects = [document.getElementsByClassName("iziToast-capsule")[0],
+                        d3.select('#relation_input_type_other').node(),
+                        document.getElementsByClassName("iziToast-capsule")[0]];
+
+            contents = ["To add a custom relation, simply select 'other' as the relation type.",
+                        
+                        "<p>Specify the name of the relation in the text input field, and the weight. For now, "
+                        +"type in \"myRelation\" in the text input field, and put 100 as the weight.</p>"
+                        +"<p>Click confirm to finish defining the relation.</p>"
+
+                        ];
+            
+            onChangeCallback = function(targetElement) {
+                if(this._currentStep === 0){
+
+                } else if(this._currentStep === 1){
+                    that.eventListenerKeyword = "new_edge_defined_other";
+                }
+            }
+            onExitCallback = function(targetElement){
+                that.startTimedMessageGenerator("Set a custom relation by specifying its name and the weight."); 
+            }
+
+        }else if(stage === "new_edge_defined_other"){
+
+            objects = [document.getElementById("networkContainer")];
+
+            contents = [
                         "<p>Now we will move on to the second way of recording information, which is to add new concepts.</p>"
                         +"<p>When you cannot find the exact concept that you want to connect a relation to, you can define a new concept.</p>",
 
@@ -275,10 +339,9 @@ class Tutorial{
                         +"<p>(close this message and try selecting \"Add new concept\" option)</p>"];
             
             onChangeCallback = function(targetElement){
-                if(this._currentStep === 2){
-                    that.conceptMap.setAddNodeMode(false);
+                if(this._currentStep === 1){
                     that.conceptMap.setAddEdgeMode(false);
-                    that.eventListenerKeyword = "set_combine_node_mode";
+                    that.eventListenerKeyword = "add_new_node";
                 }
             }
 
@@ -286,46 +349,43 @@ class Tutorial{
                 that.startTimedMessageGenerator("Right-click on the graph display, and select \"Add new concept\" option");
             }
 
-        } else if(stage === "set_combine_node_mode"){
-            this.intro.exit();
-            this.stopTimer();
-            var delayInMilliseconds = 1500; // 1.5 second delay
-            setTimeout(function() {
-                that.setTutorialContent("set_combine_node_mode_after_delay");
-            }, delayInMilliseconds);
-            return;
+        } else if(stage === "add_new_node"){
 
-        } else if(stage === "set_combine_node_mode_after_delay"){
-            objects = [document.getElementById("networkEditModeDisplay"),
-                        document.getElementById("networkContainer")];
+            objects = [document.getElementsByClassName("iziToast-capsule")[0]];
 
-            contents = ["Similarly as before, now we are in AddConceptMode. Whenever you enter this mode, this message will appear in order to indicate the current interaction mode.",
+            contents = [
 
-                        "<p>A new concept can be defined by combining multiple existing concepts.</p>"
-                        +"<p>For example, you can combine \"Sun-synchronousOrbit\" node and \"600km\" node to define a new concept "
-                        +"\"Sun-synchronous orbit with altitude 600km\".</p>"
-                        +"<p>Note that you cannot select concepts that are mutually exclusive or "
-                        +"simple instances of orbits and instruments (e.g. SSO-600-DD, LEO-600-polar, AERO_POL, SAR_ALTIM)</p>",
+                "<p>Similarly as before, a pop up message will appear.</p>",
 
-                        "<p>To combine multiple concepts, first click the nodes to be combined. "
-                        +"Then use the right-click to open a menu and select \"Confirm concept addition\"</p>"
-                        +"<p>Try adding a new concept by selecting multiple concept nodes.</p>"
-                        +"<p>(close this message and define a new concept)</p>"];
-            
-            onChangeCallback = function(targetElement){
-                if(this._currentStep === 2){
+                "<p>Adding a new concept simply requires typing in the name of the concept to be defined.</p>"
+                +"<p>To continue, try typing in \"myConcept\" in the text input field, and click confirm.</p>"
+            ];
+                        
+            onChangeCallback = function(targetElement) {
+                if(this._currentStep === 0){
+                    // Remove iziToast overlay layer
+                    d3.select('.iziToast-overlay.fadeIn').remove();
+
+                    // Get iziToast element
+                    let iziToastElement = document.querySelector('.iziToast-capsule');
+                    iziToastElement.parentNode.removeChild(iziToastElement);
+
+                    // Re-insert the iziToast element
+                    let body = document.querySelector('body');
+                    body.appendChild(iziToastElement, body.childNodes[0]);
+
+                } else if(this._currentStep === 1){
                     that.eventListenerKeyword = "new_node_added";
                 }
             }
 
-            onExitCallback = function(targetElement) {
-                that.startTimedMessageGenerator("Select multiple nodes. Then, right-click to open a menu and select \"Confirm concept addition\"");
-            }
+            onExitCallback = function(targetElement){}
 
         } else if(stage === "new_node_added"){
+
             this.intro.exit();
             this.stopTimer();
-            var delayInMilliseconds = 2500; // 2.5 second delay
+            var delayInMilliseconds = 1000; // 1.0 second delay
             setTimeout(function() {
                 that.setTutorialContent("new_node_added_after_delay");
             }, delayInMilliseconds);
@@ -337,13 +397,15 @@ class Tutorial{
                         null,
                         document.getElementById("submitButton")];
 
-            contents = ["After the new concept is added, you can hover the mouse over the node to view its label.",
+            contents = ["<p>Note that a new node is added. Initially, it doesn't have any connection, so it may float around.</p>"
+                        +"<p>To fix its location, add relations connecting the new concept to a pre-existing concept.</p>",
 
-                        "<p>We covered two different ways of recording information using the interactive graph:</p>"
+                        "<p>We have covered two different ways of recording information using the interactive graph:</p>"
                         +"<ol><li>Adding new relations</li>"
                         +"<li>Adding new concepts</li></ol>"
                         +"<p>Now you will be given 10 minutes to record any positive or negative relations "
-                        +"that you think may be present among the concepts provided.</p>"
+                        +"that you think may be present among the concepts provided. "
+                        +"You may also record custom relations or add new concepts as needed.</p>"
                         + "<p>Try to identify and record as many relations as you can based on your prior knowledge "
                         +"about designing an Earth observation mission.</p>",
 
@@ -357,7 +419,6 @@ class Tutorial{
             }
 
             onExitCallback = function(targetElement) {
-                that.conceptMap.setAddNodeMode(false);
                 that.conceptMap.setAddEdgeMode(false);
 
                 // Save the duration as a file
@@ -446,7 +507,6 @@ class Tutorial{
         }
     }
 }
-
 
 class TutorialTimer{
     constructor(){        
