@@ -466,7 +466,7 @@ class Tutorial{
     startTimedMessageGenerator(hintMessage){
         var callback = [];
         var duration = [];
-        var d1 = 1 * 10 * 1000;
+        var d1 = 1 * 20 * 1000;
         var callback1 = () => {
             iziToast.destroy();
             iziToast.info({
@@ -476,7 +476,7 @@ class Tutorial{
                 timeout: 10000
             });
         };
-        var d2 = 1 * 20 * 1000;
+        var d2 = 1 * 40 * 1000;
         var callback2 = () => {
             iziToast.destroy();
             iziToast.info({

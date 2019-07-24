@@ -392,6 +392,7 @@ class ConceptMap{
                         + "margin-right: 10px"
                         + "float: left;";
 
+        iziToast.destroy();
         iziToast.question({
             drag: false,
             timeout: false,
@@ -566,6 +567,7 @@ class ConceptMap{
             }
         }
 
+        iziToast.destroy();
         iziToast.question({
             drag: false,
             timeout: false,
