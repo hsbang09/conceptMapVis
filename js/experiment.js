@@ -4,82 +4,67 @@ var exampleParticipantID = "0497289903001004819-5_21_10_45";
 class Experiment{
 
     constructor(conceptMap){
-        this.conceptMap = conceptMap;
+        window.onbeforeunload = function() { return "Warning: Changes you made may not be saved."; };
 
+        this.conceptMap = conceptMap;
+        this.treatmentCondition = null;
+        this.treatmentConditionName = null;
         this.participantID = null;
+
         // Experiment stages: 
-        //      - 0: Concept mapping before any interaction
-        //      - 1: Concept mapping during interaction
-        //      - 2: Problem solving (no modifiication allowed)
-        this.stage = -1; 
+            // prior_knowledge_task: Concept mapping before learning task
+            // learning_task: Concept mapping during learning task
+            // problem_solving_task: (no modification allowed)
+        this.stage = "prior_knowledge_task";
+
+        // Timer for each task
+        this.clock = null;
 
         let that = this;
-        d3.selectAll('#submitButton').on('click', (d) => { 
-            var submit = confirm("Are you sure you want to submit the result?"); 
+
+        // Disable buttons
+        if(d3.select("#helpButton").node()){
+            d3.select("#helpButton").node().disabled = true;
+        }
+        if(d3.select("#submitButton").node()){
+            d3.select("#submitButton").node().disabled = true;
+        } 
+    }
+
+    loadStage(){
+        let that = this;
+        this.conceptMap.setAddEdgeMode(false);
+
+        // Set up the submit button
+        d3.select('#submitButton').on('click', (d) => { 
+            let submit = confirm("Are you sure you want to submit the result?"); 
             if(submit){
                 // download the result file
                 that.endStage();
             }
         }); 
-    }
+        d3.select("#submitButton").node().disabled = false;
 
-    endStage(){
-        if(this.clock){
-            this.clock.stop();
+        // Remove any info from the previous stage
+        let removeUserGeneratedInfo = () => {
+            // remove all newly added edges and nodes
+            let edgesToRemove = this.conceptMap.newEdges.clear();
+            this.conceptMap.edges.remove(edgesToRemove);
+
+            let nodesToRemove = this.conceptMap.newNodes.clear();
+            this.conceptMap.nodes.remove(nodesToRemove);
         }
-        this.saveNetwork();
-        this.generateSignInMessage();
-    }
 
-    startNextStage(){
-        let that = this;
-        that.stage += 1;
-        var callback = [];
-        var duration = [];
-        var timeLimitExists = false;
+        if(this.stage === "prior_knowledge_task"){
+            removeUserGeneratedInfo();
 
-        if(this.stage === 0){
-            timeLimitExists = true;
+        }else if(this.stage === "learning_task"){
+            removeUserGeneratedInfo();
 
-            // remove all newly added edges and nodes
-            let edgesToRemove = this.conceptMap.newEdges.clear();
-            this.conceptMap.edges.remove(edgesToRemove);
-
-            let nodesToRemove = this.conceptMap.newNodes.clear();
-            this.conceptMap.nodes.remove(nodesToRemove);
-
-            var d1 = 8 * 60 * 1000;
-            var callback1 = () => {
-                alert("8 minutes passed! You have 2 more minutes to finish up. If you are finished, you can click the submit button below.");
-            };
-            var d2 = 10 * 60 * 1000;
-            var callback2 = () => {
-                alert("End of the session");
-                that.endStage();
-            };
-
-            // Set callback functions
-            callback = [callback1, callback2];
-            duration = [d1, d2];
-
-        }else if(this.stage === 1){
-            PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "learning_task");
-            timeLimitExists = false;
-
-            // remove all newly added edges and nodes
-            let edgesToRemove = this.conceptMap.newEdges.clear();
-            this.conceptMap.edges.remove(edgesToRemove);
-
-            let nodesToRemove = this.conceptMap.newNodes.clear();
-            this.conceptMap.nodes.remove(nodesToRemove);
-
-        }else{
-            PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "problem_solving");
-            timeLimitExists = false;
+        }else if(this.stage === "problem_solving_task"){
             d3.select('#submitButton').node().disabled = true;
 
             // Disable adding or modifying edges
-            this.conceptMap.setAddEdgeMode(false);
             this.conceptMap.contextMenu = null;
             document.getElementById('networkContainer').removeEventListener('contextmenu', this.conceptMap.contextMenuEventListener);
             document.getElementById('networkContainer').addEventListener('contextmenu', (e) => {
@@ -90,6 +75,198 @@ class Experiment{
                 });
             }, false);
         }
+
+        PubSub.publish(EXPERIMENT_TUTORIAL_START);
+    }
+
+    generateSignInMessage(){
+        let that = this;
+
+        let textInput = '<input type="text" style="width: 300px">';
+        let buttonStyle = "width: 80px;" 
+                        + "margin-left: 10px"
+                        + "margin-right: 10px"
+                        + "float: left;";
+
+        let title, message, submitCallback;
+        if(this.stage === "prior_knowledge_task"){
+
+            title = "Copy and paste the participant ID";
+            message = "(provided in the top-right corner of the tutorial page)";
+
+            submitCallback = function (instance, toast, button, event, inputs) {
+                let inputParticipantID = inputs[0].value;
+                let valid = true;
+
+                if(inputParticipantID.indexOf("articipan") !== -1){
+                    valid = false;
+                } else if(inputParticipantID.indexOf("ID:") !== -1){
+                    valid = false;
+                } else if(inputParticipantID.indexOf("004819") === -1){
+                    valid = false;
+                }
+
+                let count = 0;
+                for(let i = 0; i < inputParticipantID.length; i++){
+                    if(inputParticipantID[i] === "_"){
+                        count += 1;
+                    }
+                }
+                if(count !== 3){
+                    valid = false;
+                }
+
+                if(valid){
+                    that.treatmentCondition = +inputParticipantID[12];
+                    if(that.treatmentCondition === 0){
+                        that.treatmentConditionName = "design_inspection";
+                    } else if (that.treatmentCondition === 1){
+                        that.treatmentConditionName = "manual";
+                    } else if (that.treatmentCondition === 2){
+                        that.treatmentConditionName = "automated";
+                    } else if(that.treatmentCondition === 3){
+                        that.treatmentConditionName = "interactive";
+                    } else if (that.treatmentCondition === 4){
+                        that.treatmentConditionName = "manual_generalization";
+                    } else if (that.treatmentCondition === 5){
+                        that.treatmentConditionName = "automated_generalization";
+                    } else if(that.treatmentCondition === 6){
+                        that.treatmentConditionName = "interactive_generalization";
+                    } 
+                    that.participantID = inputParticipantID;
+                    that.displayParticipantID(inputParticipantID);
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                    that.loadStage();
+
+                }else{
+                    that.generateErrorMessage("Invalid participant ID. Please copy and paste the particpant ID from the tutorial page");
+                }
+            }
+
+        } else {
+            title = "To continue, type in a passcode";
+            message = "(Please ask the experimenter to provide the passcode)";
+
+            submitCallback = function (instance, toast, button, event, inputs) {
+                let input = inputs[0].value;
+                if(input === "goseakers"){
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                    that.loadStage();
+
+                }else{
+                    that.generateErrorMessage("Invalid passcode");
+                }
+            }
+        }
+
+        iziToast.question({
+            drag: false,
+            timeout: false,
+            close: false,
+            overlay: true,
+            displayMode: 0,
+            id: 'question',
+            color: 'blue',
+            progressBar: false,
+            title: title,
+            message: message,
+            position: 'center',
+            inputs: [
+                [textInput, 'change', function (instance, toast, select, event) {}],
+            ],
+            buttons: [
+                ['<button id="iziToast_button_confirm" style="'+ buttonStyle +'"><b>Confirm</b></button>', submitCallback, false], // true to focus
+            ],
+        });
+    }
+
+    endStage(){
+        this.stopTimer();
+        this.saveNetwork();
+
+        if(this.stage === "prior_knowledge_task"){
+            this.stage = "learning_task";
+
+        } else if(this.stage === "learning_task"){
+            this.stage = "problem_solving_task";
+        }
+
+        this.generateSignInMessage();
+    }
+    
+    startStage(){
+        let that = this;
+
+        let callback = [];
+        let duration = [];
+        let timeLimitExists = false;
+
+        this.conceptMap.setAddEdgeMode(false);
+
+        let startMessage = null;
+        let helpMessage = null;
+
+        if(this.stage === "prior_knowledge_task"){
+            timeLimitExists = true;
+
+            // remove all newly added edges and nodes
+            let edgesToRemove = this.conceptMap.newEdges.clear();
+            this.conceptMap.edges.remove(edgesToRemove);
+
+            let nodesToRemove = this.conceptMap.newNodes.clear();
+            this.conceptMap.nodes.remove(nodesToRemove);
+
+            let d1 = 8 * 60 * 1000;
+            let callback1 = () => {
+                alert("8 minutes passed! You have 2 more minutes to finish up. If you are finished, you can click the submit button below.");
+            };
+            let d2 = 10 * 60 * 1000;
+            let callback2 = () => {
+                alert("End of the session");
+                that.endStage();
+            };
+            // Set callback functions
+            callback = [callback1, callback2];
+            duration = [d1, d2];
+
+            startMessage = "Record as many relations as possible based on your prior knowledge.";
+            helpMessage = startMessage;
+
+        }else if(this.stage === "learning_task"){
+            timeLimitExists = false;
+            startMessage = "Record as many relations as possible based on the observations "
+                    +"you made from the design data (instead of relying on your prior knowledge).";
+            helpMessage = startMessage;
+
+
+        }else if(this.stage === "problem_solving_task"){
+            timeLimitExists = false;
+            startMessage = "Refer to the information recorded in this graph interface for solving problems.";
+            helpMessage = startMessage;
+
+        }
+
+        // Set up the help button
+        d3.select("#helpButton").node().disabled = false;
+        d3.select('#helpButton').on('click', (d) => { 
+            // Start the prior knowledge task
+            iziToast.destroy();
+            iziToast.info({
+                title: helpMessage,
+                message: '',
+                position: 'topRight',
+                timeout: 10000,
+            });
+        }).text("Show help message"); 
+
+        // Start the prior knowledge task
+        iziToast.destroy();
+        iziToast.info({
+            title: startMessage,
+            message: '',
+            position: 'topRight',
+            timeout: 10000
+        });
 
         this.startTimer(callback, duration, timeLimitExists);
     }
@@ -112,7 +289,9 @@ class Experiment{
     }
 
     stopTimer(){
-        this.clock.stop();
+        if(this.clock){
+            this.clock.stop();
+        }
     }
 
     saveNetwork(){
@@ -236,91 +415,6 @@ class Experiment{
         iziToast.destroy();
     }
 
-    generateSignInMessage(){
-        let that = this;
-
-        var textInput = '<input type="text" style="width: 300px">';
-        var buttonStyle = "width: 80px;" 
-                        + "margin-left: 10px"
-                        + "margin-right: 10px"
-                        + "float: left;";
-
-        var title, message, submitCallback;
-        if(this.stage === -1){
-            title = "Copy and paste the participant ID";
-            message = "(provided in the top-right corner of the tutorial page)";
-
-            submitCallback = function (instance, toast, button, event, inputs) {
-                    
-                var inputParticipantID = inputs[0].value;
-                var valid = true;
-
-                if(inputParticipantID.indexOf("articipan") !== -1){
-                    valid = false;
-                } else if(inputParticipantID.indexOf("ID:") !== -1){
-                    valid = false;
-                } else if(inputParticipantID.indexOf("004819") === -1){
-                    valid = false;
-                }
-
-                var count = 0;
-                for(let i = 0; i < inputParticipantID.length; i++){
-                    if(inputParticipantID[i] === "_"){
-                        count += 1;
-                    }
-                }
-                if(count !== 3){
-                    valid = false;
-                }
-
-                if(valid){
-                    that.participantID = inputParticipantID;
-                    that.displayParticipantID(inputParticipantID);
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                    PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "start");
-
-                }else{
-                    that.generateErrorMessage("Invalid participant ID. Please copy and paste the particpant ID from the tutorial page");
-                }
-            }
-
-        }else{
-            title = "To continue, type in a passcode";
-            message = "(Please ask the experimenter to provide the passcode)";
-
-            submitCallback = function (instance, toast, button, event, inputs) {
-                var input = inputs[0].value;
-                if(input === "goseakers"){
-                    that.startNextStage();
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-
-                }else{
-                    that.generateErrorMessage("Invalid passcode");
-                }
-            }
-        }
-
-        iziToast.question({
-            drag: false,
-            timeout: false,
-            close: false,
-            overlay: true,
-            displayMode: 0,
-            id: 'question',
-            color: 'blue',
-            progressBar: false,
-            title: title,
-            message: message,
-            position: 'center',
-            inputs: [
-                [textInput, 'change', function (instance, toast, select, event) {}],
-            ],
-            buttons: [
-                ['<button id="iziToast_button_confirm" style="'+ buttonStyle +'"><b>Confirm</b></button>', submitCallback, false], // true to focus
-            ],
-        });
-    }
-    
     importUserGeneratedNetwork(filename){
         let that = this;
         $.getJSON(filename, (d) => {

@@ -148,6 +148,18 @@ class ConceptMap{
         this.networkState = {addEdgeMode: false};
         this.selectedNodes = [];
 
+
+        // EXPERIMENT
+        this.experimentTutorial_iziToastButtons_disabled = false;
+        PubSub.subscribe(EXPERIMENT_TUTORIAL_EVENT, function(msg, data){
+            if(data === "enable_iziToast_buttons"){
+                that.experimentTutorial_iziToastButtons_disabled = false;
+            }else if(data === "disable_iziToast_buttons"){
+                that.experimentTutorial_iziToastButtons_disabled = true;
+            }
+        });
+
+
         this.userGeneratedConceptGroup = GROUPS.length;
 
         $.getJSON(filename, (d) => {
@@ -381,16 +393,43 @@ class ConceptMap{
 
         let labelInput;
         if(addingNewNode){
-            labelInput = '<input type="text">';
+            labelInput = '<input id="new_concept_label_input" type="text">';
 
         }else{
-            labelInput = '<input type="text" value="'+ initialLabel +'">';
+            labelInput = '<input id="new_concept_label_input" type="text" value="'+ initialLabel +'">';
         }
         
         let buttonStyle = "width: 80px;" 
                         + "margin-left: 10px"
                         + "margin-right: 10px"
                         + "float: left;";
+
+
+        let inputCallback = function(){
+            let labelInputValue = d3.select("#new_concept_label_input").node().value;
+            let validInput = true;
+
+            if(labelInputValue === "" || labelInputValue === null){
+                validInput = false;
+            }
+
+            // EXPERIMENT
+            if(that.experimentTutorial_iziToastButtons_disabled){
+                validInput = false;
+            }
+
+            let confirmButton = d3.select("#iziToast_button_confirm");
+            if(validInput){
+                // Activate confirm button                    
+                confirmButton.node().disabled = false;
+                confirmButton.select('b').style("opacity", "1.0");
+
+            } else {
+                let confirmButton = d3.select("#iziToast_button_confirm");
+                confirmButton.node().disabled = true;
+                confirmButton.select('b').style("opacity", "0.05");
+            }
+        }
 
         iziToast.destroy();
         iziToast.question({
@@ -405,10 +444,12 @@ class ConceptMap{
             message: 'Please type in the name of the new concept.',
             position: 'center',
             inputs: [
-                [labelInput, 'change', function (instance, toast, select, event) {}],
+                [labelInput, 'keyup', function (instance, toast, select, event) {
+                    inputCallback();
+                }],
             ],
             buttons: [
-                ['<button id="iziToast_button_confirm" style="'+ buttonStyle +'"><b>Confirm</b></button>', function (instance, toast, button, event, inputs) {
+                ['<button id="iziToast_button_confirm" disabled style="'+ buttonStyle +'"><b style="opacity: 0.05">Confirm</b></button>', function (instance, toast, button, event, inputs) {
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                     data.label = inputs[0].value;
 
@@ -423,7 +464,6 @@ class ConceptMap{
                         that.nodes.update(data);
                         that.newNodes.update(data);
                     }
-                    
                 }, false], // true to focus
 
                 ['<button id="iziToast_button_cancel" style="'+ buttonStyle +'">Cancel</button>', function (instance, toast, button, e) {
@@ -531,7 +571,7 @@ class ConceptMap{
                     .style('margin-left','10px')
                     .style('margin-right','10px')
                     .attr('type','text')
-                    .on('change', ()=>{
+                    .on('keyup', ()=>{
                         inputCallback();
                     });
 
@@ -552,6 +592,11 @@ class ConceptMap{
                 if(!connectionName){
                     validInput = false;
                 }
+            }
+
+            // EXPERIMENT
+            if(that.experimentTutorial_iziToastButtons_disabled){
+                validInput = false;
             }
 
             let confirmButton = d3.select("#iziToast_button_confirm");
