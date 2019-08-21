@@ -62,6 +62,11 @@ class Experiment{
             removeUserGeneratedInfo();
 
         }else if(this.stage === "problem_solving_task"){
+
+            if(this.treatmentConditionName === "design_inspection"){
+                removeUserGeneratedInfo();
+            }
+
             d3.select('#submitButton').node().disabled = true;
 
             // Disable adding or modifying edges
@@ -185,8 +190,13 @@ class Experiment{
         this.saveNetwork();
 
         if(this.stage === "prior_knowledge_task"){
-            this.stage = "learning_task";
-
+            if(this.treatmentConditionName === "design_inspection"){
+                // Skip learning_task
+                this.stage = "problem_solving_task";
+            } else {
+                this.stage = "learning_task";
+            }
+            
         } else if(this.stage === "learning_task"){
             this.stage = "problem_solving_task";
         }
@@ -241,9 +251,8 @@ class Experiment{
 
         }else if(this.stage === "problem_solving_task"){
             timeLimitExists = false;
-            startMessage = "Refer to the information recorded in this graph interface for solving problems.";
+            startMessage = "You may refer to the information recorded in this graph interface for solving problems.";
             helpMessage = startMessage;
-
         }
 
         // Set up the help button
@@ -253,6 +262,7 @@ class Experiment{
             iziToast.destroy();
             iziToast.info({
                 title: helpMessage,
+                titleSize: '20px',
                 message: '',
                 position: 'topRight',
                 timeout: 10000,
@@ -263,6 +273,7 @@ class Experiment{
         iziToast.destroy();
         iziToast.info({
             title: startMessage,
+            titleSize: '20px',
             message: '',
             position: 'topRight',
             timeout: 10000

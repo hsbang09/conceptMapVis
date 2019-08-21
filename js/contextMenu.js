@@ -182,6 +182,7 @@ class ContextMenu {
         if(!this.contextMenuSize['default']['scaled']){
             let tempContextMenu = d3.select('#networkContainer')
                                     .append('svg')
+                                    .attr('id', 'tempContextMenuSVG')
                                     .append('g')
                                     .selectAll('.tempContextMenu')
                                     .data(items)
@@ -208,7 +209,7 @@ class ContextMenu {
 
             // cleanup
             d3.select('#networkContainer')
-                .select('svg')
+                .select('#tempContextMenuSVG')
                 .remove();                        
         }
     }

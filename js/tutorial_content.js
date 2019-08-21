@@ -372,14 +372,21 @@ function loadTutorialContent(){
             onChangeCallback: null,
             onExitCallback: null,
     	},
-    	    	{
-            name: "problem_solving_task",
+    	{
+            name: "problem_solving_task_v1",
             object: undefined, 
             content: "<p>As you answer the questions, you may refer to the information you recorded in this graph interface.</p>"
             	+"<p>Note that you are not allowed to make any changes to the graph during this part of the experiment. </p>",
             onChangeCallback: null,
             onExitCallback: null,
     	},
-
+        {
+            name: "problem_solving_task_v2",
+            object: undefined, 
+            content: "<p>You may refer to the information in this graph interface as you analyze the dataset. </p>"
+                +"<p>Note that you are not allowed to make any changes to the graph during this part of the experiment. </p>",
+            onChangeCallback: null,
+            onExitCallback: null,
+        },
     ];
 }

@@ -171,7 +171,7 @@ class ConceptMap{
                 let groupIndex = -1;
                 for(let j = 0; j < GROUPS.length; j++){
                     let thisGroup = GROUPS[j];
-                    if(thisGroup.indexOf(label) != -1){
+                    if(thisGroup.indexOf(label) !== -1){
                         groupIndex = j;
                         break;
                     }
@@ -352,6 +352,8 @@ class ConceptMap{
 
             // Add new context menu
             container.addEventListener('contextmenu', this.contextMenuEventListener, false);
+
+            this.displayGroupColorLegend();
         });
     }
 
@@ -799,6 +801,86 @@ class ConceptMap{
         } else {
             return testGroup.indexOf(label) !== -1;
         }
+    }
+
+    displayGroupColorLegend(){
+        let that = this;
+        let usedGroupIDs = [];
+        for(let key in this.nodes._data){
+            let group = this.nodes._data[key].group;
+            if(usedGroupIDs.indexOf(group) === -1){
+                usedGroupIDs.push(group);
+            }
+        }
+
+        let usedGroups = [];
+        for(let i = 0; i < usedGroupIDs.length; i++){
+            let groupID = usedGroupIDs[i];
+            let label = GROUP_LABELS[groupID];
+            let color = this.network.groups.groups[groupID].color.background;
+            usedGroups.push({id:i, label: label, color: color});
+        }
+        
+        let container = document.getElementById('networkContainer');
+        let containerWidth = container.clientWidth;
+        let containerHeight = container.clientHeight;
+        let offset = 6;
+
+        let width = 240;
+        let height = 355;
+        let containerLocX = + containerWidth - width - offset;
+        let containerLocY = + containerHeight - height - offset;
+
+        let legendVerticalOffset = 30;
+        let legendCircleOffset = 20;
+
+        let legendContainer = d3.select('#networkContainer')
+            .append('div')
+            .attr('id', 'groupColorLegendContainer')
+            .style('left', containerLocX + 'px')
+            .style('top', containerLocY +'px')
+            .style('position', 'absolute');
+
+        let svg = legendContainer.append('svg')
+            .style('width', width + 'px')
+            .style('height', height + 'px');
+
+        let legendEnter = svg.selectAll('div')
+                .data(usedGroups)
+                .enter()
+                .append('g')
+                .attr('class', 'group_color_legend')
+                .attr("transform", (d) => {
+                    let y = + legendVerticalOffset * (d.id + 1);
+                    let x = + 10;
+                    return "translate(" + x + "," + y + ")";
+                })
+                .style('width', '100%')
+                .style('height', legendVerticalOffset);
+
+        legendEnter.append('circle')
+            .attr('cx', 0)
+            .attr('cy', 0)
+            .attr('r', 10)
+            .style('fill', (d) => {
+                return d.color;
+            })
+
+        legendEnter.append('text')
+            .style('font-size','20px')
+            .attr('x', 20)
+            .attr('y', 4)
+            .text((d) => {
+                return d.label;
+            })
+
+        // svg.append("circle").attr("cx",200).attr("cy",130).attr("r", 6).style("fill", "#69b3a2")
+        // svg.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "#404080")
+        // svg.append("text").attr("x", 220).attr("y", 130).text("variable A").style("font-size", "15px").attr("alignment-baseline","middle")
+        // svg.append("text").attr("x", 220).attr("y", 160).text("variable B").style("font-size", "15px").attr("alignment-baseline","middle")
+        // conceptMap.network.groups.groups[3].color.background
+
+
     }
 }
 

@@ -60,6 +60,12 @@ class Tutorial{
             stageContent = this.getContentsHavingKeyword(TUTORIAL_CONTENT, "learning_task");
         } else if(stage === "problem_solving_task"){
             stageContent = this.getContentsHavingKeyword(TUTORIAL_CONTENT, "problem_solving_task");
+
+            if(this.experiment.treatmentConditionName === "design_inspection"){
+                stageContent = this.filterContentByKeyword(stageContent, "problem_solving_task_v1");
+            } else {
+                stageContent = this.filterContentByKeyword(stageContent, "problem_solving_task_v2");
+            }
         }
 
         // Update the target object
@@ -127,7 +133,8 @@ class Tutorial{
         }
 
         this.intro.setOption('showButtons', true)
-                    .setOption('showBullets', true);
+                    .setOption('showBullets', true)
+                    .setOption('keyboardNavigation', false);
         
         if(!classname){
             classname = 'introJsTooltip';
