@@ -26,6 +26,7 @@ class Experiment{
         if(d3.select("#helpButton").node()){
             d3.select("#helpButton").node().disabled = true;
         }
+
         if(d3.select("#submitButton").node()){
             d3.select("#submitButton").node().disabled = true;
         } 
@@ -43,7 +44,6 @@ class Experiment{
                 that.endStage();
             }
         }); 
-        d3.select("#submitButton").node().disabled = false;
 
         // Remove any info from the previous stage
         let removeUserGeneratedInfo = () => {
@@ -242,17 +242,22 @@ class Experiment{
             startMessage = "Record as many relations as possible based on your prior knowledge.";
             helpMessage = startMessage;
 
+            d3.select("#submitButton").node().disabled = false; 
+
         }else if(this.stage === "learning_task"){
             timeLimitExists = false;
             startMessage = "Record as many relations as possible based on the observations "
                     +"you made from the design data (instead of relying on your prior knowledge).";
             helpMessage = startMessage;
 
+            d3.select("#submitButton").node().disabled = false; 
 
         }else if(this.stage === "problem_solving_task"){
             timeLimitExists = false;
             startMessage = "You may refer to the information recorded in this graph interface for solving problems.";
             helpMessage = startMessage;
+
+            d3.select("#submitButton").node().disabled = true; 
         }
 
         // Set up the help button
@@ -267,7 +272,7 @@ class Experiment{
                 position: 'topRight',
                 timeout: 10000,
             });
-        }).text("Show help message"); 
+        }).text("Show task goal");
 
         // Start the prior knowledge task
         iziToast.destroy();

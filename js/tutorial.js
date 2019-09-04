@@ -35,6 +35,8 @@ class Tutorial{
         d3.selectAll('#helpButton').on('click', (d) => { 
             this.setTutorialContent(this.experiment.stage, this.progress_keyword);
         }); 
+
+        d3.select("#submitButton").node().disabled = true;
     }
 
     setTutorialContent(stage, progressKeyword){
@@ -133,7 +135,7 @@ class Tutorial{
         }
 
         this.intro.setOption('showButtons', true)
-                    .setOption('showBullets', true)
+                    .setOption('showBullets', false)
                     .setOption('keyboardNavigation', false);
         
         if(!classname){
