@@ -226,11 +226,11 @@ class Experiment{
             let nodesToRemove = this.conceptMap.newNodes.clear();
             this.conceptMap.nodes.remove(nodesToRemove);
 
-            let d1 = 8 * 60 * 1000;
+            let d1 = 5 * 60 * 1000;
             let callback1 = () => {
-                alert("8 minutes passed! You have 2 more minutes to finish up. If you are finished, you can click the submit button below.");
+                alert("5 minutes passed! You have 2 more minutes to finish up. If you are finished, you can click the submit button below.");
             };
-            let d2 = 10 * 60 * 1000;
+            let d2 = 7 * 60 * 1000;
             let callback2 = () => {
                 alert("End of the session");
                 that.endStage();
