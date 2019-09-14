@@ -2,10 +2,17 @@ var TUTORIAL_CONTENT = null;
 
 function loadTutorialContent(){
     TUTORIAL_CONTENT = [
+        {
+            name: "tutorial-opening-0",
+            object: null, 
+            content: "<p>This is the page you are going to use throughout the experiment to record various information.</p>", 
+            onChangeCallback: null,
+            onExitCallback: null,
+        },
     	{
             name: "tutorial-opening-1",
             object: null, 
-            content: "<p>Before starting the main task, we are first going to measure the level of your prior knowledge "
+            content: "<p>Before starting the main task of analyzing the data, we are first going to measure the level of your prior knowledge "
                     +"in designing Earth-observing satellite missions. </p>", 
             onChangeCallback: null,
             onExitCallback: null,
@@ -38,9 +45,13 @@ function loadTutorialContent(){
     	{
             name: "tutorial-opening-4",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>You can move and highlight vertices by dragging and clicking the vertices.</p>"
-        			+"<p>This makes it easier to view vertices and their connections when the graph is cluttered.</p>"
-        			+"<p>You can also zoom in and zoom out using the mouse (or touch pad).</p>",
+            content:   "The concept map is an interactive tool, so you can interact with the graph in various ways using your mouse (or a touch pad):"
+                    +"<ol>"
+                    +"<li>Click concepts to highlight connections</li>"
+                    +"<li>Hover mouse over a concept to view a short description</li>"
+                    +"<li>Move concepts around by dragging</li>"
+                    +"<li>Pan, zoom in, or zoom out</li>"
+                    +"</ol>",
             onChangeCallback: null,
             onExitCallback: null,
     	},
@@ -349,12 +360,6 @@ function loadTutorialContent(){
     	},
 
 
-
-
-
-
-
-
         {
             name: "tutorial-textInput-1",
             object: document.getElementById("toggleTextInputPanelButton"), 
@@ -393,25 +398,25 @@ function loadTutorialContent(){
             content: "<p>We have covered two different ways of recording information on the concept map:</p>"
 	                +"<ol><li>Adding new relations</li>"
 	                +"<li>Adding new concepts</li></ol>"
-                    +"<p>As we just covered, you can also record in formation in text.</p>"
-                    +"<p></p>"
-	                +"<p>Now you will be given 7 minutes to record any positive or negative relations "
-	                +"that you think may be present among the concepts provided. "
-	                +"You may also record custom relations or add new concepts as needed.</p>"
-	                + "<p>Try to identify and record as many relations as you can based on your prior knowledge "
-	                +"about designing an Earth observation mission.</p>",
-            onChangeCallback: null,
+                    +"<p>As we just saw, you can also record in formation in text.</p>"
+                    +"<p></p>",
+            onChangeCallback: function(currentStep){
+                tutorial.experiment.closeTextInputPanel();
+            },
             onExitCallback: null,
     	},
-
-
-
-
-
-
-
-
-
+        {name: "tutorial-summary-2",
+            object: document.getElementById("cMapNetworkContainer"), 
+            content: "<p>Now you will be given 7 minutes to record any positive or negative relations "
+                    +"that you think may be present among the concepts provided. "
+                    +"You may also record custom relations or add new concepts as needed.</p>"
+                    + "<p>Try to identify and record as many relations as you can based on your prior knowledge "
+                    +"about designing an Earth observation mission.</p>",
+            onChangeCallback: function(currentStep){
+                tutorial.experiment.closeTextInputPanel();
+            },
+            onExitCallback: null,
+        },
 
 
     	{

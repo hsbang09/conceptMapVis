@@ -17,16 +17,17 @@ var INSTRUMENT_DESCRIPTION = ['Ocean color spectrometer',
                             'Wide-swath radar altimeter'];
 
 var INSTRUMENT_TYPES = ['radar', 'lidar', 'imager'];
+
 var MEASUREMENTS = ['radiationBudget', 'atmosphericChem', 'atmosphericProp', 'aerosol', 'cloud', 'oceanColor', 'seaSurfaceProp', 
                     'soilMoisture', 'glacierAndIce', 'vegetation', 'topography', 'landCover'];
 var MEASUREMENT_DESCRIPTION = [
                             'Downward long-wave irradiance at Earth surface, upward long-wave irradiance, etc.',
-                            'CH4, CO, CO2, O3, CFCs/HFCs, NOx-NO, NO2-, N2O5, HNO3, etc.',
-                            'Atmospheric humidity, wind speed & direction, air temperature at surface, etc.',
+                            'Atmospheric chemistry: CH4, CO, CO2, O3, CFCs/HFCs, NOx-NO, NO2-, N2O5, HNO3, etc.',
+                            'Atmospheric properties: Atmospheric humidity, wind speed & direction, air temperature at surface, etc.',
                             'Aerosol height, optical depth, shape, composition, scattering properties, etc.',
                             'Cloud top height, cloud droplet size, cloud cover, cloud ice, etc.',
                             'Ocean color - Chlorophyll absorption and fluorescence, pigments, phytoplankton, etc.',
-                            'Sea level height, sea surface temperature, surface currents, wave height, etc.',
+                            'Sear surface properties: Sea level height, sea surface temperature, surface currents, wave height, etc.',
                             'Soil moisture',
                             'Glacier surface elevation, sea ice thinkness, snow cover, snow depth. etc.',
                             'Vegetation type and structure, leaf area index, canopy density',
@@ -38,7 +39,12 @@ var SPECTRAL_REGION = ['VNIR','UV','SWIR','MW','LWIR'];
 var SPECTRAL_REGION_DESCRIPTION = ['Visible and near-infrared','Ultraviolet','Short-wave infrared','Microwave','Long-wave infrared'];
 
 var ILLUMINATION_CONDITION = ['active', 'passive'];
+var ILLUMINATION_CONDITION_DESCRIPTION = ['Has its own light source', 
+                                            'Does NOT have its own light source'];
+
 var INSTRUMENT_POWER = ['highPower', 'lowPower'];
+var INSTRUMENT_POWER_DESCRIPTION = ['Required power more than 350W',
+                                    'Required power less than 350W'];
 
 var ORBITS = ['LEO-600-polar', 'SSO-600-AM', 'SSO-600-DD', 'SSO-800-DD', 'SSO-800-PM'];
 var ORBIT_DESCRIPTION = ['LEO with polar inclination at 600km altitude', 
@@ -48,8 +54,16 @@ var ORBIT_DESCRIPTION = ['LEO with polar inclination at 600km altitude',
                             'SSO with afternoon LTAN at 600km altitude'];
 
 var ALTITUDES = ['600km', '800km'];
+var ALTITUDES_DESCRIPTION = ['Altitude of 600km',
+                            'Altitude of 800km']
+
 var LTAN = ['AM', 'PM', 'dawn-dusk'];
+var LTAN_DESCRIPTION = ['Local Time of the Ascending Node is AM',
+                        'Local Time of the Ascending Node is PM',
+                        'Local Time of the Ascending Node is dawn or dusk'];
+
 var ORBIT_TYPES = ['sun-synchronousOrbit', 'polarOrbit'];
+
 
 var GROUPS = [
     ABSTRACT_CONCEPTS, 
@@ -64,7 +78,6 @@ var GROUPS = [
     LTAN, 
     ORBIT_TYPES
 ];
-
 var GROUP_LABELS = [
     "abstractConcepts", 
     "instruments", 
@@ -132,7 +145,7 @@ class ConceptMap{
         let that = this;
 
         if(typeof seed === "undefined"){
-            seed = 596436;
+            seed = 408450;
         }
         this.seed = seed;
         this.data = null;
@@ -205,6 +218,23 @@ class ConceptMap{
                 } else if(MEASUREMENTS.indexOf(label) !== -1){
                     let index = MEASUREMENTS.indexOf(label);
                     description = MEASUREMENT_DESCRIPTION[index];
+
+                } else if(ILLUMINATION_CONDITION.indexOf(label) !== -1){
+                    let index = ILLUMINATION_CONDITION.indexOf(label);
+                    description = ILLUMINATION_CONDITION_DESCRIPTION[index];
+                
+                } else if(INSTRUMENT_POWER.indexOf(label) !== -1){
+                    let index = INSTRUMENT_POWER.indexOf(label);
+                    description = INSTRUMENT_POWER_DESCRIPTION[index];
+                
+                } else if(LTAN.indexOf(label) !== -1){
+                    let index = LTAN.indexOf(label);
+                    description = LTAN_DESCRIPTION[index];
+                
+                } else if(ALTITUDES.indexOf(label) !== -1){
+                    let index = ALTITUDES.indexOf(label);
+                    description = ALTITUDES_DESCRIPTION[index];
+                
                 }
 
                 if(description){
@@ -232,6 +262,12 @@ class ConceptMap{
                     },
                     manipulation: {
                         enabled: false,
+                    },
+                    physics: {
+                        barnesHut: {
+                          avoidOverlap: 0.3,
+                          damping: 0.25,
+                        }
                     }
                 };
 

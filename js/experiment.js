@@ -39,7 +39,7 @@ class Experiment{
         this.textInputPanelOpen = false;
 
         let height = this.conceptMap.container.getBoundingClientRect().height;
-        let top = this.conceptMap.container.getBoundingClientRect().top;
+        let top = this.conceptMap.container.getBoundingClientRect().top + window.pageYOffset;
 
         d3.select('#textInputPanel')
             .style('height', height + "px")
@@ -52,7 +52,7 @@ class Experiment{
 
         d3.select('#textInputDirection')
             .style('height', "13%")
-            .html("<p>Use this text box to record information that you find difficult or impossible to record on the concept map.</p>"
+            .html("<p>Use this text box to record information that you find difficult or impossible to record in the form of concepts and relations.</p>"
                 +"");
         d3.select('#textInputBox')
             .style('height', "87%");
@@ -65,7 +65,7 @@ class Experiment{
                 } else {
                     this.textInputPanelOpen = true;
                     this.openTextInputPanel();
-                    
+
                     // EXPERIMENT
                     PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "toggle_text_input_panel");
                 }
@@ -288,22 +288,30 @@ class Experiment{
             callback = [callback1, callback2];
             duration = [d1, d2];
 
-            startMessage = "Record as many relations as possible based on your prior knowledge.";
+            startMessage = "<p>Record as many relations as possible based on your prior knowledge on designing Earth-observation missions.</p>"
+                            +"<p>You can record information by: </p>"
+                            +"<ol><li>Adding new relations</li>"
+                            +"<li>Adding new concepts</li>"
+                            +"<li>Writing information in a free text form</li></ol>";                           
             helpMessage = startMessage;
 
             d3.select("#submitButton").node().disabled = false; 
 
         }else if(this.stage === "learning_task"){
             timeLimitExists = false;
-            startMessage = "Record as many relations as possible based on the observations "
-                    +"you made from the design data (instead of relying on your prior knowledge).";
+            startMessage = "<p>Record as many relations as possible based on the observations you make as you analyze the data "
+                        +"(instead of relying on your prior knowledge). </p>"
+                        +"<p>You can record information by: </p>"
+                        +"<ol><li>Adding new relations</li>"
+                        +"<li>Adding new concepts</li>"
+                        +"<li>Writing information in a free text form</li></ol>";
             helpMessage = startMessage;
 
             d3.select("#submitButton").node().disabled = false; 
 
         }else if(this.stage === "problem_solving_task"){
             timeLimitExists = false;
-            startMessage = "You may refer to the information recorded in the concept map for solving problems.";
+            startMessage = "You may refer to the information recorded here for solving problems.";
             helpMessage = startMessage;
 
             d3.select("#submitButton").node().disabled = true; 
@@ -320,7 +328,7 @@ class Experiment{
                 titleSize: '2.3vh',
                 message: '',
                 position: 'topRight',
-                timeout: 10000,
+                timeout: 14000,
             });
         }).text("Show task goal");
 
