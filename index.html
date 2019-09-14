@@ -15,25 +15,36 @@
   <link href="css/lib/introjs.css" rel="stylesheet" type="text/css"/>
   <link href="css/networkVis.css" rel="stylesheet" type="text/css" />
   <link href="css/experiment.css" rel="stylesheet" type="text/css" />
-  <link href="css/tutorial.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
 
-  <div id="statusDisplay">
-    <div id="timer"></div>
-  </div>
-
-  <div id="conceptMapDiv">
-    <div id="statusDisplay"></div>
-    <div id="networkContainer"></div>
-  </div>
-
-  <div id="outputDiv">
-    <div id="buttonsContainer">
-      <button type="button" id="helpButton">Reopen tutorial</button>
-      <button type="button" id="submitButton">Submit network</button>
+  <div id="content">
+    <div id="statusDisplayDiv">
+      <div id="timer"></div>
+      <div id="toggleTextInputPanelDiv">
+        <button id="toggleTextInputPanelButton">Open Text Input Panel</button>
+      </div>
     </div>
+
+    <div id="conceptMapDiv">
+      <div id="cMapStatusDisplay"></div>
+      <div id="cMapNetworkContainer"></div>
+    </div>
+
+    <div id="optionsDiv">
+      <div id="buttonsContainer">
+        <button type="button" id="helpButton">Reopen tutorial</button>
+        <button type="button" id="submitButton">Submit network</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="textInputPanel">
+    <div id="textInputContainer">
+      <div id="textInputDirection"></div>
+      <textarea id="textInputBox"></textarea>
+    </div>  
   </div>
   
   <script src="js/networkVis.js" type="text/javascript"></script>
@@ -42,6 +53,7 @@
   <script src="js/tutorial_content.js" type="text/javascript"></script>
   <script src="js/tutorial.js" type="text/javascript"></script>
 
+
   <script type="text/javascript">
 
     var conceptMap = new ConceptMap("data/visData/ClimateCentric-6.json");
@@ -49,11 +61,10 @@
     var experiment = new Experiment(conceptMap);
     var tutorial = new Tutorial(conceptMap, experiment);
 
-
     // experiment.importUserGeneratedNetwork("data/experimentSaveData/9302789648000004819-6_17_10_6-conceptMap-1.json");
     // experiment.importUserGeneratedNetwork("data/experimentSaveData/9214032375002004819-6_12_20_3-conceptMap-1.json");
     
-    experiment.generateSignInMessage();
+    // experiment.generateSignInMessage();
 
     // experiment.participantID = exampleParticipantID;
     // experiment.displayParticipantID(experiment.participantID);

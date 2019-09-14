@@ -1,31 +1,45 @@
-#networkContainer {
-	width: 100%;
-	height: 900px;
-	border: 1px solid lightgray;
+
+#content {
+    display: grid;
+    grid-template-columns:  0.7% [c1] 98% [c2] 1%;
+    grid-template-rows: [r1] 4.5vh [r2] 85vh [r3] 9.5vh [r4];
+    grid-column-gap: 0px;
+    grid-row-gap: 10px;
+}
+
+#statusDisplayDiv{
+    grid-column: c1 / c2;
+    grid-row: r1 / r2;
+}
+
+#conceptMapDiv{
+    grid-column: c1 / c2;
+    grid-row: r2 / r3;
+}
+
+#optionsDiv{
+    grid-column: c1 / c2;
+    grid-row: r3 / r4;
+}
+
+#cMapNetworkContainer {
+	border: 0.35vh solid lightgray;
 	position: relative;
-}
-
-#outputDiv {
 	width: 100%;
-	margin-top: 20px;
+	height: 100%;
 }
 
-#outputDiv > div {
+#buttonsContainer{
 	margin: auto;
-	width: 420px;
+	width: 40vw;
 }
 
-#helpButton {
-	width: 200px;
-	font-size: 18px;
-	margin-right: 10px;
-/*	position: relative;
-	left: 45%;*/
+#buttonsContainer > button{
+	width: 13vw;
+	font-size: 1.8vh;
+	margin-right: 3vw;
+	margin-top: 1.5vh;
 }
 
-#submitButton {
-	width: 200px;
-	font-size: 18px;
-/*	position: relative;
-	left: 45%;*/
-}
+
+

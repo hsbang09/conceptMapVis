@@ -10,6 +10,7 @@ class ContextMenu {
         this.newNodes = conceptMap.newNodes;
         this.newEdges = conceptMap.newEdges;
         this.networkState = conceptMap.networkState;
+
         this.marginRatio = 0.13;
 
         this.contextItems = {
@@ -31,7 +32,7 @@ class ContextMenu {
         };
 
         this.contextMenuSize = {
-            'default':{'weight':null,
+            'default': {'weight':null,
                     'width':null,
                     'margin':0.15,
                     'scaled':false},
@@ -99,7 +100,8 @@ class ContextMenu {
         var height = size.height;
         var margin = size.margin;
 
-        var container = document.getElementById('networkContainer');
+        var container = document.getElementById(this.conceptMap.cmapContainerID);
+        let clientHeight = container.clientHeight;
         var offsetLeft = container.offsetLeft;
         var offsetTop = container.offsetTop;
         var x = event.clientX - offsetLeft;
@@ -118,7 +120,7 @@ class ContextMenu {
         }
 
         // Draw the menu
-        var contextMenu = d3.select('#networkContainer')
+        var contextMenu = d3.select("#" + this.conceptMap.cmapContainerID)
                         .append('div')
                         .attr('class', 'context-menu')
                         .style('left', x + 'px')
@@ -145,15 +147,15 @@ class ContextMenu {
                 this.ContextMenuAction(context, d.value);
             });
         
-        var menuEntry = d3.selectAll('.menu-entry')
+        let menuEntry = d3.selectAll('.menu-entry')
             .attr('x', x)
             .attr('y', function(d, i){ return y + (i * height); })
             .attr('width', width + 'px')
             .attr('height', height + 'px')
-            .style('padding-left','6px')
-            .style('padding-right', '10px')
-            .style('padding-top', '4px')
-            .style('padding-bottom', '4px')
+            .style('padding-left', clientHeight / 99.5 + 'px')
+            .style('padding-right', clientHeight / 59.7 + 'px')
+            .style('padding-top', clientHeight / 149.25 + 'px')
+            .style('padding-bottom', clientHeight / 149.25 + 'px')
             .style('background-color', 'rgb(244,244,244)')
             .style('stroke', 'white')
             .style('stroke-width', '1px')
@@ -168,7 +170,7 @@ class ContextMenu {
                 return d.text; 
             })
             .style('color', 'steelblue')
-            .style('font-size', '19px');
+            .style('font-size', clientHeight / 42.6 + "px");
 
         // Remove context menu upon click
         d3.select('body')
@@ -180,7 +182,7 @@ class ContextMenu {
     // Automatically set width, height, and margin;
     scaleItems(items) {
         if(!this.contextMenuSize['default']['scaled']){
-            let tempContextMenu = d3.select('#networkContainer')
+            let tempContextMenu = d3.select("#" + this.conceptMap.cmapContainerID)
                                     .append('svg')
                                     .attr('id', 'tempContextMenuSVG')
                                     .append('g')
@@ -208,7 +210,7 @@ class ContextMenu {
             this.contextMenuSize['default']['scaled'] = true;
 
             // cleanup
-            d3.select('#networkContainer')
+            d3.select("#" + this.conceptMap.cmapContainerID)
                 .select('#tempContextMenuSVG')
                 .remove();                        
         }

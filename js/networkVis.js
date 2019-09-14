@@ -1,4 +1,3 @@
-EDGE_LABEL_FONT_SIZE = 14;
 
 var ABSTRACT_CONCEPTS = ["Orbit", "Instrument"];
 
@@ -129,7 +128,7 @@ var LINK_LABELS = {
 };
 
 class ConceptMap{
-    constructor(filename, seed){
+    constructor(filename, seed, cmapContainerID){
         let that = this;
 
         if(typeof seed === "undefined"){
@@ -143,22 +142,34 @@ class ConceptMap{
         this.newNodes = new vis.DataSet([]);
         this.newEdges = new vis.DataSet([]);
 
+        if(!cmapContainerID){
+            this.cmapContainerID = "cMapNetworkContainer";
+        } else {
+            this.cmapContainerID = cmapContainerID;
+        }
+
         this.contextMenu = null;
         this.contextMenuEventListener = null;
         this.networkState = {addEdgeMode: false};
         this.selectedNodes = [];
 
+        // Get container
+        this.container = document.getElementById(this.cmapContainerID);
+
+        let containerWidth = this.container.clientWidth;
+        let containerHeight = this.container.clientHeight;
+        this.edge_label_font_size = this.container.clientHeight / 42.64;
 
         // EXPERIMENT
         this.experimentTutorial_iziToastButtons_disabled = false;
         PubSub.subscribe(EXPERIMENT_TUTORIAL_EVENT, function(msg, data){
             if(data === "enable_iziToast_buttons"){
                 that.experimentTutorial_iziToastButtons_disabled = false;
+
             }else if(data === "disable_iziToast_buttons"){
                 that.experimentTutorial_iziToastButtons_disabled = true;
             }
         });
-
 
         this.userGeneratedConceptGroup = GROUPS.length;
 
@@ -202,8 +213,6 @@ class ConceptMap{
             }
 
             // create a network
-            let container = document.getElementById('networkContainer');
-
             let options = {
                     layout: {
                         randomSeed: that.seed,
@@ -237,7 +246,7 @@ class ConceptMap{
                                 edges: this.edges
                             };
 
-            this.network = new vis.Network(container, inputData, options);
+            this.network = new vis.Network(this.container, inputData, options);
 
             let mouseInteractionCallback = (params) => {
 
@@ -280,7 +289,7 @@ class ConceptMap{
                                             edgeToUpdate.label = linkLabel;
                                         }
                                     }
-                                    edgeToUpdate.font.size = EDGE_LABEL_FONT_SIZE;
+                                    edgeToUpdate.font.size = this.edge_label_font_size;
 
                                 }else{
                                     // For all edges not connected to the selected node, set font size to 0
@@ -307,7 +316,6 @@ class ConceptMap{
                     }
 
                 } else {
-
                     if(!isDraggingEvent){
                         // De-select all nodes
                         that.selectedNodes = [];
@@ -320,7 +328,7 @@ class ConceptMap{
                         for(let i = 0; i < edgeIds.length; i++){
                             if(edgeID){
                                 if(edgeIds[i] === edgeID){
-                                    that.edges.update({id:edgeIds[i], font:{size: EDGE_LABEL_FONT_SIZE}});
+                                    that.edges.update({id:edgeIds[i], font:{size: that.edge_label_font_size}});
                                     continue;
                                 }
                             }
@@ -351,7 +359,7 @@ class ConceptMap{
             }
 
             // Add new context menu
-            container.addEventListener('contextmenu', this.contextMenuEventListener, false);
+            this.container.addEventListener('contextmenu', this.contextMenuEventListener, false);
 
             this.displayGroupColorLegend();
         });
@@ -401,11 +409,10 @@ class ConceptMap{
             labelInput = '<input id="new_concept_label_input" type="text" value="'+ initialLabel +'">';
         }
         
-        let buttonStyle = "width: 80px;" 
-                        + "margin-left: 10px"
-                        + "margin-right: 10px"
+        let buttonStyle = "width: "+ this.container.clientHeight / 7.46 +"px;" 
+                        + "margin-left: "+ this.container.clientHeight / 59.7 +"px"
+                        + "margin-right: "+ this.container.clientHeight / 59.7 +"px"
                         + "float: left;";
-
 
         let inputCallback = function(){
             let labelInputValue = d3.select("#new_concept_label_input").node().value;
@@ -477,7 +484,7 @@ class ConceptMap{
     }
 
     addNewEdge(node1, node2){
-        let edgeData = {id: this.generateRandomUniqueID(), from: node1, to: node2, font: {size: EDGE_LABEL_FONT_SIZE}};
+        let edgeData = {id: this.generateRandomUniqueID(), from: node1, to: node2, font: {size: this.edge_label_font_size}};
         this.setEdgeProperties(edgeData);
     }
 
@@ -512,15 +519,14 @@ class ConceptMap{
         let connectionTypeSelectID = "relation_input_type";
         let connectionTypeOtherID = "relation_input_type_other";
         let connectionWeightID = "relation_input_weight";
-
         
-        let buttonStyle = "width: 80px;" 
-                        + "margin-left: 10px"
-                        + "margin-right: 10px"
+        let buttonStyle = "width: "+ this.container.clientHeight / 7.46 + "px;" 
+                        + "margin-left: "+ this.container.clientHeight / 59.7 + "px"
+                        + "margin-right: "+ this.container.clientHeight / 59.7 + "px"
                         + "float: left;";
 
-        let inputFieldStyle = "margin-left: 10px"
-                        + "margin-right: 10px";
+        let inputFieldStyle = "margin-left: "+ this.container.clientHeight / 59.7 + "px"
+                        + "margin-right: "+ this.container.clientHeight / 59.7 + "px";
 
         let linkTypeInput, weightInput;
         if(addingNewEdge){
@@ -570,8 +576,8 @@ class ConceptMap{
                 d3.select('.iziToast-inputs')
                     .insert('input', 'select + *')
                     .attr('id', connectionTypeOtherID)
-                    .style('margin-left','10px')
-                    .style('margin-right','10px')
+                    .style('margin-left', that.container.clientHeight / 59.7 + "px")
+                    .style('margin-right', that.container.clientHeight / 59.7 + "px")
                     .attr('type','text')
                     .on('keyup', ()=>{
                         inputCallback();
@@ -711,11 +717,9 @@ class ConceptMap{
             } 
 
             this.networkState.addEdgeMode = true;
-            let container = document.getElementById('networkContainer');
-            let offset = 6;
-            // let x = container.offsetLeft + offset;
-            // let y = container.offsetTop + offset;
-            d3.select('#networkContainer')
+
+            let offset = this.container.clientHeight / 150;
+            d3.select('#cMapNetworkContainer')
                 .append('div')
                 .attr('id', 'networkEditModeDisplay')
                 .style('left', offset + 'px')
@@ -723,11 +727,11 @@ class ConceptMap{
                 .style('position', 'absolute')
                 .text('AddRelationMode: define a new relation by selecting two nodes')
                 .style('color', 'green')
-                .style('font-size','24px');
+                .style('font-size','2.7vh');
 
-            d3.select('#networkContainer')
+            d3.select('#cMapNetworkContainer')
                 .style('border-color','#0E8E1C')
-                .style('border-width','2.5px');
+                .style('border-width','0.65vh');
 
             // EXPERIMENT
             PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "set_add_edge_mode");
@@ -737,9 +741,9 @@ class ConceptMap{
             this.network.selectNodes([]);
             this.networkState.addEdgeMode = false;
             d3.select('#networkEditModeDisplay').remove();
-            d3.select('#networkContainer')
-                .style('border-color','#000000')
-                .style('border-width','0.8px');
+            d3.select('#cMapNetworkContainer')
+                .style('border-color','lightgray')
+                .style('border-width','0.35vh');
         }
     }
 
@@ -821,20 +825,21 @@ class ConceptMap{
             usedGroups.push({id:i, label: label, color: color});
         }
         
-        let container = document.getElementById('networkContainer');
+        let container = document.getElementById(this.cmapContainerID);
         let containerWidth = container.clientWidth;
         let containerHeight = container.clientHeight;
-        let offset = 6;
 
-        let width = 240;
-        let height = 355;
-        let containerLocX = + containerWidth - width - offset;
+        let offset = containerHeight / 65;
+        let legendFontSize = containerHeight / 41;
+        let width = containerHeight / 3.7;
+        let height = containerHeight / 2.6;
+        // let containerLocX = + containerWidth - width - offset;
+        let containerLocX = + offset;
         let containerLocY = + containerHeight - height - offset;
+        let legendVerticalOffset = containerHeight / 30;
+        let circleRadius = containerHeight / 99.5;
 
-        let legendVerticalOffset = 30;
-        let legendCircleOffset = 20;
-
-        let legendContainer = d3.select('#networkContainer')
+        let legendContainer = d3.select("#" + this.cmapContainerID)
             .append('div')
             .attr('id', 'groupColorLegendContainer')
             .style('left', containerLocX + 'px')
@@ -852,7 +857,7 @@ class ConceptMap{
                 .attr('class', 'group_color_legend')
                 .attr("transform", (d) => {
                     let y = + legendVerticalOffset * (d.id + 1);
-                    let x = + 10;
+                    let x = + circleRadius * 1.3;
                     return "translate(" + x + "," + y + ")";
                 })
                 .style('width', '100%')
@@ -861,26 +866,18 @@ class ConceptMap{
         legendEnter.append('circle')
             .attr('cx', 0)
             .attr('cy', 0)
-            .attr('r', 10)
+            .attr('r', circleRadius)
             .style('fill', (d) => {
                 return d.color;
             })
 
         legendEnter.append('text')
-            .style('font-size','20px')
-            .attr('x', 20)
-            .attr('y', 4)
+            .style('font-size', legendFontSize + "px")
+            .attr('x', legendFontSize / 1.3)
+            .attr('y', legendFontSize / 4.0)
             .text((d) => {
                 return d.label;
             })
-
-        // svg.append("circle").attr("cx",200).attr("cy",130).attr("r", 6).style("fill", "#69b3a2")
-        // svg.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "#404080")
-        // svg.append("text").attr("x", 220).attr("y", 130).text("variable A").style("font-size", "15px").attr("alignment-baseline","middle")
-        // svg.append("text").attr("x", 220).attr("y", 160).text("variable B").style("font-size", "15px").attr("alignment-baseline","middle")
-        // conceptMap.network.groups.groups[3].color.background
-
-
     }
 }
 

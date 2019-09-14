@@ -30,6 +30,42 @@ class Experiment{
         if(d3.select("#submitButton").node()){
             d3.select("#submitButton").node().disabled = true;
         } 
+
+        this.loadTextInputPanel();
+    }
+
+    loadTextInputPanel(){
+        // Set up text input panel
+        this.textInputPanelOpen = false;
+
+        let height = this.conceptMap.container.getBoundingClientRect().height;
+        let top = this.conceptMap.container.getBoundingClientRect().top;
+
+        d3.select('#textInputPanel')
+            .style('height', height + "px")
+            .style('left', document.body.clientWidth + "px")
+            .style('top', top + "px");
+
+        d3.select('#textInputContainer')
+            .style('height', height * 0.9 + "px")
+            .style('margin-top', height * 0.05 + "px");
+
+        d3.select('#textInputDirection')
+            .style('height', "10%")
+            .text("Record information that you cannot record on the concept map.");
+        d3.select('#textInputBox')
+            .style('height', "90%");
+
+        d3.select("#toggleTextInputPanelButton")
+            .on('click', (d) => { 
+                if(this.textInputPanelOpen){
+                    this.textInputPanelOpen = false;
+                    this.closeTextInputPanel();
+                } else {
+                    this.textInputPanelOpen = true;
+                    this.openTextInputPanel();
+                }
+            }); 
     }
 
     loadStage(){
@@ -71,8 +107,8 @@ class Experiment{
 
             // Disable adding or modifying edges
             this.conceptMap.contextMenu = null;
-            document.getElementById('networkContainer').removeEventListener('contextmenu', this.conceptMap.contextMenuEventListener);
-            document.getElementById('networkContainer').addEventListener('contextmenu', (e) => {
+            document.getElementById(this.conceptMap.cmapContainerID).removeEventListener('contextmenu', this.conceptMap.contextMenuEventListener);
+            document.getElementById(this.conceptMap.cmapContainerID).addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 iziToast.warning({
                     title: 'Modifying edges is disabled for this part of the experiment',
@@ -87,10 +123,10 @@ class Experiment{
     generateSignInMessage(){
         let that = this;
 
-        let textInput = '<input type="text" style="width: 300px">';
-        let buttonStyle = "width: 80px;" 
-                        + "margin-left: 10px"
-                        + "margin-right: 10px"
+        let textInput = '<input type="text" style="width: '+ this.conceptMap.container.clientHeight / 2.8 +'px">';
+        let buttonStyle = "width: "+ this.conceptMap.container.clientHeight / 7.46 +"px;" 
+                        + "margin-left: "+ this.conceptMap.container.clientHeight / 59.7 +"px"
+                        + "margin-right: "+ this.conceptMap.container.clientHeight / 59.7 +"px"
                         + "float: left;";
 
         let title, message, submitCallback;
@@ -102,6 +138,10 @@ class Experiment{
             submitCallback = function (instance, toast, button, event, inputs) {
                 let inputParticipantID = inputs[0].value;
                 let valid = true;
+
+                if(inputParticipantID === "1232123"){
+                    inputParticipantID = exampleParticipantID;
+                }
 
                 if(inputParticipantID.indexOf("articipan") !== -1){
                     valid = false;
@@ -356,7 +396,25 @@ class Experiment{
         out.nodes = nodesOut;
 
         let filename = this.participantID + "-conceptMap-"+ this.stage + ".json";
-        this.saveTextAsFile(filename, JSON.stringify(out));
+        this.saveTextAsFile2(filename, JSON.stringify(out));
+    }
+
+    saveTextAsFile2(filename, inputText){        
+        let name = filename;
+        let type = "application/json";
+        let data = inputText;
+
+        if (data !== null && navigator.msSaveBlob)
+            return navigator.msSaveBlob(new Blob([data], { type: type }), name);
+
+        let a = $("<a style='display: none;'/>");
+        let url = window.URL.createObjectURL(new Blob([data], {type: type}));
+        a.attr("href", url);
+        a.attr("download", name);
+        $("body").append(a);
+        a[0].click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
     }
 
     saveTextAsFile(filename, inputText){
@@ -412,12 +470,12 @@ class Experiment{
     }
 
     displayParticipantID(participantID){
-        var container = document.getElementById('networkContainer');
+        var container = document.getElementById(this.conceptMap.cmapContainerID);
         var width = container.clientWidth;
         var offset = 6;
         var x = + width - 345;
         var y = + offset;
-        d3.select('#networkContainer')
+        d3.select('#'+this.conceptMap.cmapContainerID)
             .append('div')
             .attr('id', 'participantID')
             .style('left', x + 'px')
@@ -429,6 +487,21 @@ class Experiment{
 
     closeAllMessage(){
         iziToast.destroy();
+    }
+
+    openTextInputPanel() {
+        let container = document.getElementById(this.conceptMap.cmapContainerID);
+        let width = container.clientWidth * 2 / 5;
+        let left = document.body.clientWidth - width - 3;
+        document.getElementById("textInputPanel").style.width = width + "px";
+        document.getElementById("textInputPanel").style.left = left + "px";
+        d3.select('#toggleTextInputPanelButton').text('Close Text Input Panel');
+    }
+
+    closeTextInputPanel() {
+        document.getElementById("textInputPanel").style.width = "0px";
+        document.getElementById("textInputPanel").style.left = document.body.clientWidth + "px";
+        d3.select('#toggleTextInputPanelButton').text('Open Text Input Panel');
     }
 
     importUserGeneratedNetwork(filename){

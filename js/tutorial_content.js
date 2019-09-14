@@ -12,7 +12,7 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-opening-2",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>You will record information using an interactive graph, which displays different concepts "
         			+"and their relationships related to Earth-observing satellite missions.</p>", 
             onChangeCallback: null,
@@ -20,7 +20,7 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-opening-3",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>The vertices in this graph represent concepts related to orbits and instruments. "
         			+"The edges represent the relations that connect those concepts.</p>"
                     +"<p>Note that the color of each concept represents its type "
@@ -30,7 +30,7 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-opening-4",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>You can move and highlight vertices by dragging and clicking the vertices.</p>"
         			+"<p>This makes it easier to view vertices and their connections when the graph is cluttered.</p>"
         			+"<p>You can also zoom in and zoom out using the mouse (or touch pad).</p>",
@@ -39,7 +39,7 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-opening-5",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>Recording new information in this graph can be done in two ways:</p> "
                     +"<ol><li>Adding new relations</li>"
                     +"<li>Adding new concepts</li></ol>"
@@ -49,7 +49,7 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-new-relation",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>First, to add a new relation, right-click on the graph display window and click \"Add new relation\" option.</p>"
                         +"<p>(You may close this message and try selecting \"Add new relation\" option)</p>",
             onChangeCallback: function(currentStep){
@@ -83,7 +83,7 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-add-edge-mode-positive-relation",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>You can define new relations to indicate whether different pairs of concepts have positive or negative relationships.</p>"
                     +"<p>For example, you can make a new relation connecting two concepts \"SAR_ALTIM\" and \"LEO-600-polar\" to indicate "
                     +"that there is a positive effect when you assign the instrument \"SAR_ALTIM\" to the orbit \"LEO-600-polar\".</p>",
@@ -92,7 +92,7 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-add-edge-mode-negative-relation",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>The relation may also be negative, indicating that the two concepts do not go well together.</p>"
                     +"<p>For example, a negative relation between \"VEG_LID\" and \"AERO_LID\" suggests that assigning these two instruments "
                     +"to the same spacecraft negatively impacts the science benefit score, the cost, or both.</p>",
@@ -101,7 +101,7 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-add-edge-mode-click-two-concepts",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>To add a new relation, you can simply click the two concepts to be connected.</p>"
                     +"<p>To continue, close this message and try defining a new relation by clicking two concepts.<p>",
             onChangeCallback: function(currentStep){
@@ -190,7 +190,7 @@ function loadTutorialContent(){
     	},	
     	{
             name: "tutorial-add-edge-mode-defining-new-relation-4",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>Note that a new edge has been created in the graph, connecting the selected concepts.</p>",
             onChangeCallback: null,
             onExitCallback: null,
@@ -255,7 +255,7 @@ function loadTutorialContent(){
     	},	
     	{
             name: "tutorial-add-new-concept-1",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>Now we will move on to the second way of recording information, which is to add new concepts.</p>"
                     +"<p>When you cannot find the exact concept that you want to connect a relation to, you can define a new concept.</p>",
             onChangeCallback: null,
@@ -263,7 +263,7 @@ function loadTutorialContent(){
     	},	
     	{
             name: "tutorial-add-new-concept-2",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>To add a new concept, right-click on the graph display window, and click \"Add new concept\" option.</p>"
                     +"<p>(close this message and try selecting \"Add new concept\" option)</p>",
             onChangeCallback: function(currentStep){
@@ -322,7 +322,7 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-add-new-concept-4_delay_",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "",
             onChangeCallback: function(currentStep){
                 tutorial.intro.exit();
@@ -334,7 +334,7 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-add-new-concept-5",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>Note that a new node is added. Initially, it doesn't have any connection, so it may float around.</p>"
                     +"<p>To fix its location, add relations connecting the new concept to a pre-existing concept.</p>",
             onChangeCallback: null,
@@ -342,11 +342,11 @@ function loadTutorialContent(){
     	},
     	{
             name: "tutorial-summary",
-            object: document.getElementById("networkContainer"), 
+            object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>We have covered two different ways of recording information using the interactive graph:</p>"
 	                +"<ol><li>Adding new relations</li>"
 	                +"<li>Adding new concepts</li></ol>"
-	                +"<p>Now you will be given 10 minutes to record any positive or negative relations "
+	                +"<p>Now you will be given 7 minutes to record any positive or negative relations "
 	                +"that you think may be present among the concepts provided. "
 	                +"You may also record custom relations or add new concepts as needed.</p>"
 	                + "<p>Try to identify and record as many relations as you can based on your prior knowledge "

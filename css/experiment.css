@@ -1,9 +1,87 @@
 
 #timer{
-    font-size: 25px;
-    margin-left: 5px;
-    margin-top: 30px;
+    font-size: 1.2vw;
+    margin-top: 0.5vh;
+    margin-left: 2.5vw;
     color: black;
 }
 
+.introJsTooltipSmall{
+    font-size:  2.2vh;
+    max-width: 30vw;
+    min-width: 30vw;
+}
+
+.introJsTooltip{
+    font-size:  2.2vh;
+    max-width: 35vw;
+    min-width: 30vw;
+}
+
+.introJsTooltipLarge{
+    font-size:  2.2vh;
+    max-width: 41vw;
+    min-width: 36vw;
+}
+
+.introJsTooltipExtraLarge{
+    font-size:  2.2vh;
+    max-width: 48vw;
+    min-width: 43vw;
+}
+
+
+
+
+/* Text Input Side Panel Settings */
+#textInputPanel {
+  width: 0;
+  height: 0;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #DADADA;
+  overflow-x: hidden;
+  transition: 0.5s;
+  /*padding-top: 60px;*/
+}
+
+#textInputContainer{
+	width: 90%;
+	height: 0px;
+	margin-left: 5%;
+	margin-top: 0px;
+}
+
+#textInputDirection{
+	width: 100%;
+	height: 0;
+	font-size: 2.4vh;
+	float: left;
+}
+
+#textInputBox{
+	width: 100%;
+	height: 0;
+	display: block;
+	transition: 0.3s;
+	font-size: 2.3vh;
+	float: left;
+	background-color: #F8FCFF;
+}
+
+#toggleTextInputPanelButton {
+  font-size: 2.0vh;
+  cursor: pointer;
+  background-color: #111;
+  color: white;
+  padding: 1.4vh;
+  border: none;
+  float: right;
+}
+
+#toggleTextInputPanelButton:hover {
+  background-color:#444;
+}
 
