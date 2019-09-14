@@ -48,13 +48,14 @@ class Experiment{
 
         d3.select('#textInputContainer')
             .style('height', height * 0.9 + "px")
-            .style('margin-top', height * 0.05 + "px");
+            .style('margin-top', height * 0.03 + "px");
 
         d3.select('#textInputDirection')
-            .style('height', "10%")
-            .text("Record information that you cannot record on the concept map.");
+            .style('height', "13%")
+            .html("<p>Use this text box to record information that you find difficult or impossible to record on the concept map.</p>"
+                +"");
         d3.select('#textInputBox')
-            .style('height', "90%");
+            .style('height', "87%");
 
         d3.select("#toggleTextInputPanelButton")
             .on('click', (d) => { 
@@ -89,6 +90,8 @@ class Experiment{
 
             let nodesToRemove = this.conceptMap.newNodes.clear();
             this.conceptMap.nodes.remove(nodesToRemove);
+
+            d3.select("#textInputBox").node().value = "";
         }
 
         if(this.stage === "prior_knowledge_task"){
@@ -111,10 +114,12 @@ class Experiment{
             document.getElementById(this.conceptMap.cmapContainerID).addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 iziToast.warning({
-                    title: 'Modifying edges is disabled for this part of the experiment',
+                    title: 'Recording new information is disabled for this part of the experiment',
                     message: '',
                 });
             }, false);
+
+            d3.select('#textInputDirection').html("<p>Recording new information is disabled for this part of the experiment.</p>");
         }
 
         PubSub.publish(EXPERIMENT_TUTORIAL_START);
@@ -228,6 +233,7 @@ class Experiment{
     endStage(){
         this.stopTimer();
         this.saveNetwork();
+        this.saveTextInput();
 
         if(this.stage === "prior_knowledge_task"){
             if(this.treatmentConditionName === "design_inspection"){
@@ -294,10 +300,11 @@ class Experiment{
 
         }else if(this.stage === "problem_solving_task"){
             timeLimitExists = false;
-            startMessage = "You may refer to the information recorded in this graph interface for solving problems.";
+            startMessage = "You may refer to the information recorded in the concept map for solving problems.";
             helpMessage = startMessage;
 
             d3.select("#submitButton").node().disabled = true; 
+            d3.select("#textInputBox").node().disabled = true; 
         }
 
         // Set up the help button
@@ -307,7 +314,7 @@ class Experiment{
             iziToast.destroy();
             iziToast.info({
                 title: helpMessage,
-                titleSize: '20px',
+                titleSize: '2.3vh',
                 message: '',
                 position: 'topRight',
                 timeout: 10000,
@@ -318,7 +325,7 @@ class Experiment{
         iziToast.destroy();
         iziToast.info({
             title: startMessage,
-            titleSize: '20px',
+            titleSize: '2.3vh',
             message: '',
             position: 'topRight',
             timeout: 10000
@@ -348,6 +355,15 @@ class Experiment{
         if(this.clock){
             this.clock.stop();
         }
+    }
+
+    saveTextInput(){
+        let out = {};
+        out.participantID = this.participantID;
+        out.stage = this.stage;
+        out.textInput = d3.select("#textInputBox").node().value;
+        let filename = this.participantID + "-textInput-"+ this.stage + ".json";
+        this.saveTextAsFile2(filename, JSON.stringify(out));
     }
 
     saveNetwork(){

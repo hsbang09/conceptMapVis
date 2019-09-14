@@ -2,7 +2,7 @@
 #content {
     display: grid;
     grid-template-columns:  0.7% [c1] 98% [c2] 1%;
-    grid-template-rows: [r1] 4.5vh [r2] 85vh [r3] 9.5vh [r4];
+    grid-template-rows: [r1] 4.5vh [r2] 84vh [r3] 9.5vh [r4];
     grid-column-gap: 0px;
     grid-row-gap: 10px;
 }

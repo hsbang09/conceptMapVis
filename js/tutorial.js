@@ -18,10 +18,9 @@ class Tutorial{
         this.progress_keyword = null;
 
         PubSub.subscribe(EXPERIMENT_TUTORIAL_START, () => {
+            loadTutorialContent();
             this.startTutorial();
         });
-
-        loadTutorialContent();
     }
 
     startTutorial(){

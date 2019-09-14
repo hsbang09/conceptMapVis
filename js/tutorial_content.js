@@ -13,7 +13,7 @@ function loadTutorialContent(){
     	{
             name: "tutorial-opening-2",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>You will record information using an interactive graph, which displays different concepts "
+            content: "<p>You will record information using an interactive graph called concept map, which displays different concepts "
         			+"and their relationships related to Earth-observing satellite missions.</p>", 
             onChangeCallback: null,
             onExitCallback: null,
@@ -23,11 +23,18 @@ function loadTutorialContent(){
             object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>The vertices in this graph represent concepts related to orbits and instruments. "
         			+"The edges represent the relations that connect those concepts.</p>"
-                    +"<p>Note that the color of each concept represents its type "
-                    +"(e.g. type of measurement, spectral region, altitude of an orbit, etc.).</p>", 
+                    , 
             onChangeCallback: null,
             onExitCallback: null,
     	},
+        {
+            name: "tutorial-opening-3-color-legend",
+            object: document.getElementById("groupColorLegendContainer"), 
+            content: "<p>The color legend is provided here. Note that the color of each concept represents its type "
+                    +"(e.g. type of measurement, spectral region, altitude of an orbit, etc.).</p>", 
+            onChangeCallback: null,
+            onExitCallback: null,
+        },
     	{
             name: "tutorial-opening-4",
             object: document.getElementById("cMapNetworkContainer"), 
@@ -40,7 +47,7 @@ function loadTutorialContent(){
     	{
             name: "tutorial-opening-5",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>Recording new information in this graph can be done in two ways:</p> "
+            content: "<p>Recording new information in a concept map can be done in two ways:</p> "
                     +"<ol><li>Adding new relations</li>"
                     +"<li>Adding new concepts</li></ol>"
                     +"<p>This tutorial will walk you through these two methods.</p>",
@@ -50,7 +57,7 @@ function loadTutorialContent(){
     	{
             name: "tutorial-new-relation",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>First, to add a new relation, right-click on the graph display window and click \"Add new relation\" option.</p>"
+            content: "<p>First, to add a new relation, right-click on the concept map display window and click \"Add new relation\" option.</p>"
                         +"<p>(You may close this message and try selecting \"Add new relation\" option)</p>",
             onChangeCallback: function(currentStep){
             	experiment.conceptMap.setAddEdgeMode(false);
@@ -191,7 +198,7 @@ function loadTutorialContent(){
     	{
             name: "tutorial-add-edge-mode-defining-new-relation-4",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>Note that a new edge has been created in the graph, connecting the selected concepts.</p>",
+            content: "<p>Note that a new edge has been created in the concept map, connecting the selected concepts.</p>",
             onChangeCallback: null,
             onExitCallback: null,
     	},	
@@ -264,7 +271,7 @@ function loadTutorialContent(){
     	{
             name: "tutorial-add-new-concept-2",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>To add a new concept, right-click on the graph display window, and click \"Add new concept\" option.</p>"
+            content: "<p>To add a new concept, right-click on the concept map display window, and click \"Add new concept\" option.</p>"
                     +"<p>(close this message and try selecting \"Add new concept\" option)</p>",
             onChangeCallback: function(currentStep){
                 tutorial.conceptMap.setAddEdgeMode(false);
@@ -343,7 +350,7 @@ function loadTutorialContent(){
     	{
             name: "tutorial-summary",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>We have covered two different ways of recording information using the interactive graph:</p>"
+            content: "<p>We have covered two different ways of recording information on the concept map:</p>"
 	                +"<ol><li>Adding new relations</li>"
 	                +"<li>Adding new concepts</li></ol>"
 	                +"<p>Now you will be given 7 minutes to record any positive or negative relations "
@@ -357,12 +364,11 @@ function loadTutorialContent(){
     	{
             name: "tutorial-closing",
             object: document.getElementById("submitButton"), 
-            content: "<p>When you are finished, you can submit the graph by clicking this button and move on to the next "
+            content: "<p>When you are finished, you can submit the concept map by clicking this button and move on to the next "
             		+"task.</p>",
             onChangeCallback: null,
             onExitCallback: null,
     	},
-    	
     	{
             name: "learning_task",
             object: undefined, 
@@ -375,16 +381,16 @@ function loadTutorialContent(){
     	{
             name: "problem_solving_task_v1",
             object: undefined, 
-            content: "<p>As you answer the questions, you may refer to the information you recorded in this graph interface.</p>"
-            	+"<p>Note that you are not allowed to make any changes to the graph during this part of the experiment. </p>",
+            content: "<p>As you answer the questions, you may refer to the information you recorded in the concept map.</p>"
+            	+"<p>Note that you are not allowed to make any changes to the concept map during this part of the experiment. </p>",
             onChangeCallback: null,
             onExitCallback: null,
     	},
         {
             name: "problem_solving_task_v2",
             object: undefined, 
-            content: "<p>You may refer to the information in this graph interface as you analyze the dataset. </p>"
-                +"<p>Note that you are not allowed to make any changes to the graph during this part of the experiment. </p>",
+            content: "<p>You may refer to the information in the concept map interface as you analyze the dataset. </p>"
+                +"<p>Note that you are not allowed to make any changes to the concept map during this part of the experiment. </p>",
             onChangeCallback: null,
             onExitCallback: null,
         },
