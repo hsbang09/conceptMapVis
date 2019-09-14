@@ -65,6 +65,9 @@ class Experiment{
                 } else {
                     this.textInputPanelOpen = true;
                     this.openTextInputPanel();
+                    
+                    // EXPERIMENT
+                    PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "toggle_text_input_panel");
                 }
             }); 
     }
@@ -330,6 +333,8 @@ class Experiment{
             position: 'topRight',
             timeout: 10000
         });
+
+        this.closeTextInputPanel();
 
         this.startTimer(callback, duration, timeLimitExists);
     }

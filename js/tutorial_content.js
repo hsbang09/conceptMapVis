@@ -5,7 +5,7 @@ function loadTutorialContent(){
     	{
             name: "tutorial-opening-1",
             object: null, 
-            content: "<p>Before starting the task to analyze design data, we are first going to measure the level of your prior knowledge "
+            content: "<p>Before starting the main task, we are first going to measure the level of your prior knowledge "
                     +"in designing Earth-observing satellite missions. </p>", 
             onChangeCallback: null,
             onExitCallback: null,
@@ -347,12 +347,54 @@ function loadTutorialContent(){
             onChangeCallback: null,
             onExitCallback: null,
     	},
+
+
+
+
+
+
+
+
+        {
+            name: "tutorial-textInput-1",
+            object: document.getElementById("toggleTextInputPanelButton"), 
+            content: "<p>In addition to the concept map, you also have an option to record information in text.</p>"
+                    +"<p>To select this option, click the button \"Open Text Input Panel\"</p>",
+            onChangeCallback: function(currentStep){
+                tutorial.experiment.closeTextInputPanel();
+                tutorial.startTutorialEventListener("toggle_text_input_panel", currentStep);
+            },
+            onExitCallback: null,
+        },
+        {
+            name: "tutorial-textInput-1_delay_",
+            object: document.getElementById("toggleTextInputPanelButton"), 
+            content: "",
+            onChangeCallback: function(currentStep){
+                tutorial.intro.exit();
+                setTimeout(function() {
+                    tutorial.setTutorialContent("prior_knowledge_task", "tutorial-textInput-2");
+                }, 500);
+            },
+            onExitCallback: null,
+        },
+        {
+            name: "tutorial-textInput-2",
+            object: document.getElementById("textInputPanel"), 
+            content: "<p>You can write information on the provided text box as necessary.</p>"
+                    +"<p>However, we ask you to first try to record information using the cocnept map. If you find "
+                    +"some information difficult or impossible to record in the concept map, then you may record it here.</p>",
+            onChangeCallback: null,
+            onExitCallback: null,
+        },
     	{
             name: "tutorial-summary",
             object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>We have covered two different ways of recording information on the concept map:</p>"
 	                +"<ol><li>Adding new relations</li>"
 	                +"<li>Adding new concepts</li></ol>"
+                    +"<p>As we just covered, you can also record in formation in text.</p>"
+                    +"<p></p>"
 	                +"<p>Now you will be given 7 minutes to record any positive or negative relations "
 	                +"that you think may be present among the concepts provided. "
 	                +"You may also record custom relations or add new concepts as needed.</p>"
@@ -361,6 +403,17 @@ function loadTutorialContent(){
             onChangeCallback: null,
             onExitCallback: null,
     	},
+
+
+
+
+
+
+
+
+
+
+
     	{
             name: "tutorial-closing",
             object: document.getElementById("submitButton"), 

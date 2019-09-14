@@ -75,6 +75,10 @@ class Tutorial{
         this.updateContentObject(stageContent, "tutorial-add-edge-mode-intro", document.getElementById("networkEditModeDisplay"));
         this.updateContentObject(stageContent, "tutorial-add-new-concept-3", document.getElementsByClassName("iziToast-capsule")[0]);
 
+        this.updateContentObject(stageContent, "tutorial-textInput-1", document.getElementById("toggleTextInputPanelButton"));
+        this.updateContentObject(stageContent, "tutorial-textInput-2", document.getElementById("textInputPanel"));
+
+
         onChangeCallback = function(targetElement) {
             that.enable_introjs_nextButton();
             that.current_step = this._currentStep;
@@ -134,7 +138,7 @@ class Tutorial{
         }
 
         this.intro.setOption('showButtons', true)
-                    .setOption('showBullets', false)
+                    .setOption('showBullets', true)
                     .setOption('keyboardNavigation', false);
         
         if(!classname){
