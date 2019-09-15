@@ -363,7 +363,7 @@ function loadTutorialContent(){
         {
             name: "tutorial-textInput-1",
             object: document.getElementById("toggleTextInputPanelButton"), 
-            content: "<p>In addition to the concept map, you also have an option to record information in text.</p>"
+            content: "<p>In addition to the concept map, you also have an option to record information in a free-form text.</p>"
                     +"<p>To select this option, click the button \"Open Text Input Panel\"</p>",
             onChangeCallback: function(currentStep){
                 tutorial.experiment.closeTextInputPanel();
@@ -386,19 +386,20 @@ function loadTutorialContent(){
         {
             name: "tutorial-textInput-2",
             object: document.getElementById("textInputPanel"), 
-            content: "<p>You can write information on the provided text box as necessary.</p>"
-                    +"<p>However, we ask you to first try to record information using the cocnept map. If you find "
-                    +"some information difficult or impossible to record in the concept map, then you may record it here.</p>",
+            content: "<p>You can use this text box to to write things down when you find certain information difficult or impossible "
+                    +"to record in the form of concepts and relations.</p>"
+                    +"<p>However, we ask you to first try to record information using the cocnept map.</p>",
             onChangeCallback: null,
             onExitCallback: null,
         },
+
     	{
             name: "tutorial-summary",
             object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>We have covered two different ways of recording information on the concept map:</p>"
 	                +"<ol><li>Adding new relations</li>"
 	                +"<li>Adding new concepts</li></ol>"
-                    +"<p>As we just saw, you can also record in formation in text.</p>"
+                    +"<p>As we just saw, you can also record information in free-form text, when necessary.</p>"
                     +"<p></p>",
             onChangeCallback: function(currentStep){
                 tutorial.experiment.closeTextInputPanel();
@@ -407,18 +408,16 @@ function loadTutorialContent(){
     	},
         {name: "tutorial-summary-2",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>Now you will be given 7 minutes to record any positive or negative relations "
-                    +"that you think may be present among the concepts provided. "
-                    +"You may also record custom relations or add new concepts as needed.</p>"
-                    + "<p>Try to identify and record as many relations as you can based on your prior knowledge "
-                    +"about designing an Earth observation mission.</p>",
+            content: "<p>Now you will be given 7 minutes to record any relations that you think may be present among the concepts provided. </p>"
+                    +"<p>Try to identify and record as many relations as you can based on your prior knowledge "
+                    +"about designing an Earth observation mission.</p>"
+                    +"<p>There is no right or wrong answer. We are just interested in measuring how much "
+                    +"domain knowledge you have on the design problem.</p>",
             onChangeCallback: function(currentStep){
                 tutorial.experiment.closeTextInputPanel();
             },
             onExitCallback: null,
         },
-
-
     	{
             name: "tutorial-closing",
             object: document.getElementById("submitButton"), 
@@ -427,6 +426,8 @@ function loadTutorialContent(){
             onChangeCallback: null,
             onExitCallback: null,
     	},
+
+        
     	{
             name: "learning_task",
             object: undefined, 

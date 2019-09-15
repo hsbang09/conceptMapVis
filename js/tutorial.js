@@ -233,8 +233,8 @@ class Tutorial{
 
         if(typeof callback === "undefined"){
             callback = () => {
-                // Intro is closed
-                if(typeof that.intro._currentStep === "undefined"){
+                
+                if(typeof that.intro._currentStep === "undefined"){ // Intro is closed
                     that.intro.exit();
                     let temp = that.current_step + 1 + 1;
                     that.intro.start().goToStep(temp);
@@ -259,8 +259,8 @@ class Tutorial{
             if(eventKeyword === data){
                 if(that.current_step === targetStep){
 
-                    // Intro is closed
                     if(typeof that.intro._currentStep !== "undefined"){
+                        // If IIntro is not closed
                         that.enable_introjs_nextButton();
                     }
 

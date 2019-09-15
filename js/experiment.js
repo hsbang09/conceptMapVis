@@ -202,7 +202,7 @@ class Experiment{
 
             submitCallback = function (instance, toast, button, event, inputs) {
                 let input = inputs[0].value;
-                if(input === "goseakers"){
+                if(input === "ifeedexperiment"){
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                     that.loadStage();
 
