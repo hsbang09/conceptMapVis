@@ -31,6 +31,8 @@ class Experiment{
             d3.select("#submitButton").node().disabled = true;
         } 
 
+        this.experimentLogData = {};
+
         this.loadTextInputPanel();
     }
 
@@ -236,7 +238,6 @@ class Experiment{
     endStage(){
         this.stopTimer();
         this.saveNetwork();
-        this.saveTextInput();
 
         if(this.stage === "prior_knowledge_task"){
             if(this.treatmentConditionName === "design_inspection"){
@@ -370,15 +371,6 @@ class Experiment{
         }
     }
 
-    saveTextInput(){
-        let out = {};
-        out.participantID = this.participantID;
-        out.stage = this.stage;
-        out.textInput = d3.select("#textInputBox").node().value;
-        let filename = this.participantID + "-textInput-"+ this.stage + ".json";
-        this.saveTextAsFile2(filename, JSON.stringify(out));
-    }
-
     saveNetwork(){
         let that = this;
 
@@ -424,8 +416,22 @@ class Experiment{
         })
         out.nodes = nodesOut;
 
+        // Save the text box input
+        if(d3.select("#textInputBox").node()){
+            out.textInput = d3.select("#textInputBox").node().value;
+        } else {
+            out.textInput = "";
+        }
+
+        this.experimentLogData[this.stage] = out;
+        
         let filename = this.participantID + "-conceptMap-"+ this.stage + ".json";
         this.saveTextAsFile2(filename, JSON.stringify(out));
+    }
+
+    saveExperimentLogData(){
+        let filename = this.participantID + "-conceptMap-combinedLogData.json";     
+        this.saveTextAsFile2(filename, JSON.stringify(this.experimentLogData));
     }
 
     saveTextAsFile2(filename, inputText){        
