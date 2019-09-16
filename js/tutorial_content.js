@@ -421,13 +421,11 @@ function loadTutorialContent(){
     	{
             name: "tutorial-closing",
             object: document.getElementById("submitButton"), 
-            content: "<p>When you are finished, you can submit the concept map by clicking this button and move on to the next "
+            content: "<p>If you finish earlier than the alotted time, you can submit the concept map by clicking this button and move on to the next "
             		+"task.</p>",
             onChangeCallback: null,
             onExitCallback: null,
     	},
-
-        
     	{
             name: "learning_task",
             object: undefined, 
