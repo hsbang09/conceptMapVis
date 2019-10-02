@@ -5,23 +5,23 @@ function loadTutorialContent(){
         {
             name: "tutorial-opening-0",
             object: null, 
-            content: "<p>This is the page you are going to use throughout the experiment to record various information.</p>", 
+            content: "<p>This is the page you are going to use throughout the experiment to <b>record various information.</b></p>", 
             onChangeCallback: null,
             onExitCallback: null,
         },
     	{
             name: "tutorial-opening-1",
             object: null, 
-            content: "<p>Before starting the main task of analyzing the data, we are first going to measure the level of your prior knowledge "
-                    +"in designing Earth-observing satellite missions. </p>", 
+            content: "<p>Before starting the main task of analyzing the data, we are first going to <b>measure the level of your prior knowledge "
+                    +"in designing Earth-observing satellite missions. </b></p>", 
             onChangeCallback: null,
             onExitCallback: null,
     	},
     	{
             name: "tutorial-opening-2",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>You will record information using an interactive graph called concept map, which displays different concepts "
-        			+"and their relationships related to Earth-observing satellite missions.</p>", 
+            content: "<p>You will record information using an interactive graph called <b>concept map</b>, which displays <b>different concepts "
+        			+"and their relationships related to Earth-observing satellite missions.</b></p>", 
             onChangeCallback: null,
             onExitCallback: null,
     	},
@@ -45,12 +45,12 @@ function loadTutorialContent(){
     	{
             name: "tutorial-opening-4",
             object: document.getElementById("cMapNetworkContainer"), 
-            content:   "The concept map is an interactive tool, so you can interact with the graph in various ways using your mouse (or a touch pad):"
+            content:   "The concept map is an interactive tool, so you can <b>interact with the graph in various ways using your mouse </b>(or a touch pad):"
                     +"<ol>"
-                    +"<li>Click concepts to highlight connections</li>"
-                    +"<li>Hover mouse over a concept to view a short description</li>"
-                    +"<li>Move concepts around by dragging</li>"
-                    +"<li>Pan, zoom in, or zoom out</li>"
+                    +"<li><b>Click</b> concepts to highlight connections</li>"
+                    +"<li><b>Hover mouse over a concept</b> to view a short description</li>"
+                    +"<li>Move concepts around by <b>dragging</b></li>"
+                    +"<li><b>Pan, zoom in, or zoom out</b></li>"
                     +"</ol>",
             onChangeCallback: null,
             onExitCallback: null,
@@ -59,8 +59,8 @@ function loadTutorialContent(){
             name: "tutorial-opening-5",
             object: document.getElementById("cMapNetworkContainer"), 
             content: "<p>Recording new information in a concept map can be done in two ways:</p> "
-                    +"<ol><li>Adding new relations</li>"
-                    +"<li>Adding new concepts</li></ol>"
+                    +"<ol><li><b>Adding new relations</b></li>"
+                    +"<li><b>Adding new concepts</b></li></ol>"
                     +"<p>This tutorial will walk you through these two methods.</p>",
             onChangeCallback: null,
             onExitCallback: null,
@@ -102,16 +102,16 @@ function loadTutorialContent(){
     	{
             name: "tutorial-add-edge-mode-positive-relation",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>You can define new relations to indicate whether different pairs of concepts have positive or negative relationships.</p>"
+            content: "<p>You can define new relations to indicate <b>whether different pairs of concepts have positive or negative relationships.</b></p>"
                     +"<p>For example, you can make a new relation connecting two concepts \"SAR_ALTIM\" and \"LEO-600-polar\" to indicate "
-                    +"that there is a positive effect when you assign the instrument \"SAR_ALTIM\" to the orbit \"LEO-600-polar\".</p>",
+                    +"that there is a <b>positive effect</b> when you assign the instrument \"SAR_ALTIM\" to the orbit \"LEO-600-polar\".</p>",
             onChangeCallback: null,
             onExitCallback: null,
     	},
     	{
             name: "tutorial-add-edge-mode-negative-relation",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>The relation may also be negative, indicating that the two concepts do not go well together.</p>"
+            content: "<p>The relation may also be <b>negative</b>, indicating that the two concepts do not go well together.</p>"
                     +"<p>For example, a negative relation between \"VEG_LID\" and \"AERO_LID\" suggests that assigning these two instruments "
                     +"to the same spacecraft negatively impacts the science benefit score, the cost, or both.</p>",
             onChangeCallback: null,
@@ -120,7 +120,7 @@ function loadTutorialContent(){
     	{
             name: "tutorial-add-edge-mode-click-two-concepts",
             object: document.getElementById("cMapNetworkContainer"), 
-            content: "<p>To add a new relation, you can simply click the two concepts to be connected.</p>"
+            content: "<p>To add a new relation, you can simply <b>click the two concepts to be connected.</b></p>"
                     +"<p>To continue, close this message and try defining a new relation by clicking two concepts.<p>",
             onChangeCallback: function(currentStep){
                 tutorial.startTutorialEventListener("new_edge_added", currentStep);
@@ -216,7 +216,7 @@ function loadTutorialContent(){
     	{
             name: "tutorial-add-edge-mode-custom-relation-1",
             object: null, 
-            content: "<p>While 'positive' and 'negative' relations are given as default options, you can also define any custom relation.</p>",
+            content: "<p>While 'positive' and 'negative' relations are given as default options, <b>you can also define any custom relation.</b></p>",
             onChangeCallback: null,
             onExitCallback: null,
     	},	
@@ -363,7 +363,7 @@ function loadTutorialContent(){
         {
             name: "tutorial-textInput-1",
             object: document.getElementById("toggleTextInputPanelButton"), 
-            content: "<p>In addition to the concept map, you also have an option to record information in a free-form text.</p>"
+            content: "<p>In addition to the concept map, you also have an option to <b>record information in a free-form text.</b></p>"
                     +"<p>To select this option, click the button \"Open Text Input Panel\"</p>",
             onChangeCallback: function(currentStep){
                 tutorial.experiment.closeTextInputPanel();
@@ -386,9 +386,9 @@ function loadTutorialContent(){
         {
             name: "tutorial-textInput-2",
             object: document.getElementById("textInputPanel"), 
-            content: "<p>You can use this text box to to write things down when you find certain information difficult or impossible "
-                    +"to record in the form of concepts and relations.</p>"
-                    +"<p>However, we ask you to first try to record information using the cocnept map.</p>",
+            content: "<p>You can use this text box to to write things down when you find certain information <b>difficult or impossible "
+                    +"to record in the form of concepts and relations.</b></p>"
+                    +"<p>However, we ask you to <b>first try to record information using the cocnept map.</b></p>",
             onChangeCallback: null,
             onExitCallback: null,
         },
