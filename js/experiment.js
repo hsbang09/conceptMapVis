@@ -539,6 +539,28 @@ class Experiment{
         d3.select('#toggleTextInputPanelButton').text('Open Text Input Panel');
     }
 
+    importUserGeneratedNetwork2(participantID, stage){
+        let separator = "";
+        if(isWin){
+            separator = '\\';
+        } else if(isOsX  || isNix){
+            separator = '/';
+        } else {
+            // default to *nix system.
+            separator = '/'; 
+        }
+        
+        let filename;
+        if(stage === "prior_knowledge_task"){
+            filename = participantID + "-conceptMap-prior_knowledge_task.json";
+        } else if(stage === "learning_task"){
+            filename = participantID + "-conceptMap-learning_task.json";
+        }
+        let filePathArray = ['data', 'experimentSaveData', participantID, filename];
+        filename = filePathArray.join(separator);
+        this.importUserGeneratedNetwork(filename);
+    }
+
     importUserGeneratedNetwork(filename){
         let that = this;
         $.getJSON(filename, (d) => {

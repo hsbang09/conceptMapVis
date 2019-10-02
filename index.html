@@ -57,23 +57,22 @@
 
   <script type="text/javascript">
 
+    var isWin, isOsX, isNix, isNix;
+    var appVer = navigator.appVersion;
+    if      (appVer.indexOf("Win")!=-1)   isWin = true;
+    else if (appVer.indexOf("Mac")!=-1)   isOsX = true;
+    else if (appVer.indexOf("X11")!=-1)   isNix = true;
+    else if (appVer.indexOf("Linux")!=-1) isNix = true;
+
     var conceptMap = new ConceptMap("data/visData/ClimateCentric-7.json");
 
     var experiment = new Experiment(conceptMap);
     var tutorial = new Tutorial(conceptMap, experiment);
 
-    // experiment.importUserGeneratedNetwork("/Users/bang/workspace/iFEED_experiment_result_analysis_2019/data/log/5401038285006004819-9_15_19_13/5401038285006004819-9_15_19_13-conceptMap-prior_knowledge_task.json");
-    // experiment.importUserGeneratedNetwork("data/experimentSaveData/9214032375002004819-6_12_20_3-conceptMap-1.json");
-    
+    // experiment.importUserGeneratedNetwork2("3664515135004004819-9_20_14_13","prior_knowledge_task");
+    // experiment.importUserGeneratedNetwork("data/experimentSaveData/3664515135004004819-9_20_14_13/3664515135004004819-9_20_14_13-conceptMap-prior_knowledge_task.json");
+
     experiment.generateSignInMessage();
-
-    // experiment.participantID = exampleParticipantID;
-    // experiment.displayParticipantID(experiment.participantID);
-    // PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "start");
-
-    // tutorial.setTutorialContent("start");
-    // experiment.startNextStage();
-    // experiment.stopTimer();
 
   </script>
 
