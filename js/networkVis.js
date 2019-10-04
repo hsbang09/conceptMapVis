@@ -722,7 +722,8 @@ class ConceptMap{
 
                     // EXPERIMENT
                     if(connectionType === "other"){
-                        PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_edge_defined_other");
+                        // PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_edge_defined_other");
+                        PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_edge_defined");
                     }else{
                         PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "new_edge_defined");
                     }

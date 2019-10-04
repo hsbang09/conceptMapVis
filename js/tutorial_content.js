@@ -177,14 +177,9 @@ function loadTutorialContent(){
             content: "<p>Next, you need to provide a number between 0 and 100 to specify the weight. "
                 +"The weight indicates the strength of the relation.</p>"
                 +"<p>For example, if assigning \"SAR_ALTIM\" to \"LEO-600-polar\" plays a very important role in improving the overall design, "
-                +"the weight of 90 may be assigned. If the relation exists but the impact is small, then weight of 10 may be assigned. </p>",
-            onChangeCallback: null,
-            onExitCallback: null,
-    	},	
-    	{
-            name: "tutorial-add-edge-mode-defining-new-relation-3",
-            object: null, 
-            content: "<p>After specifying the relation type and the weight, you can click the confirm button.</p>",
+                +"the weight of 90 may be assigned. If the relation exists but the impact is small, then weight of 10 may be assigned. </p>"
+                +"<p>After specifying the relation type and the weight, you can click the confirm button.</p>",
+
             onChangeCallback: function(currentStep){
                 // Enable all iziToast buttons
         		PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "enable_iziToast_buttons");
@@ -252,22 +247,16 @@ function loadTutorialContent(){
     	{
             name: "tutorial-add-edge-mode-custom-relation-2",
             object: document.getElementsByClassName("iziToast-capsule")[0], 
-            content: "<p>To add a custom relation, simply select 'other' as the relation type.</p>",
-            onChangeCallback: null,
-            onExitCallback: null,
-    	},	
-    	{
-            name: "tutorial-add-edge-mode-custom-relation-3",
-            object: null, 
-            content: "<p>Specify the name of the relation in the text input field, and the weight. For now, "
-                    +"type in \"myRelation\" in the text input field, and put 100 as the weight.</p>"
+            content: "<p>To add a custom relation, simply select 'other' as the relation type.</p>"
+                    +"<p>Specify the name of the relation in the text input field, and the weight. For now, "
+                    +"type in \"myRelation\" in the text input field, and put any integer number between 0 and 100 as the weight.</p>"
                     +"<p>Click confirm to finish defining the relation.</p>",
 
             onChangeCallback: function(currentStep){
                 // Enable all iziToast buttons
         		PubSub.publish(EXPERIMENT_TUTORIAL_EVENT, "enable_iziToast_buttons");
 
-            	tutorial.startTutorialEventListener("new_edge_defined_other", currentStep);
+            	tutorial.startTutorialEventListener("new_edge_defined", currentStep);
             },
             onExitCallback: null,
     	},	
@@ -320,14 +309,8 @@ function loadTutorialContent(){
     	{
             name: "tutorial-add-new-concept-3",
             object: document.getElementsByClassName("iziToast-capsule")[0], 
-            content: "<p>Similarly as before, a pop up message will appear.</p>",
-            onChangeCallback: null,
-            onExitCallback: null,
-    	},	
-    	{
-            name: "tutorial-add-new-concept-4",
-            object: null, 
-            content: "<p>Adding a new concept simply requires typing in the name of the concept to be defined.</p>"
+            content: "<p>Similarly as before, a pop up message will appear.</p>"
+                +"<p>Adding a new concept simply requires typing in the name of the concept to be defined.</p>"
                 +"<p>To continue, try typing in \"myConcept\" in the text input field, and click confirm.</p>",
 
             onChangeCallback: function(currentStep){
