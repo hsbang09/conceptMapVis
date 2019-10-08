@@ -253,10 +253,16 @@ class ConceptMap{
                             inherit: false,
                         },
                         width: 1.2,
+                        selectionWidth: 5.8,
+                        hoverWidth: 5.8,
                         font: {
                             size: 0
                         },
                     }, 
+                    nodes:{
+                        borderWidthSelected: 10,
+                        labelHighlightBold: true,
+                    },
                     interaction:{
                         hover:true
                     },
@@ -285,7 +291,6 @@ class ConceptMap{
             this.network = new vis.Network(this.container, inputData, options);
 
             let mouseInteractionCallback = (params) => {
-
                 let isDraggingEvent = false;
                 if(params.event.type === "panstart"){
                     isDraggingEvent = true;
@@ -898,7 +903,32 @@ class ConceptMap{
                     return "translate(" + x + "," + y + ")";
                 })
                 .style('width', '100%')
-                .style('height', legendVerticalOffset);
+                .style('height', legendVerticalOffset)
+                .on("mouseover", (d) => {
+                    that.showMemberInstancesDisplay(d.label);
+
+                    d3.selectAll(".group_color_legend")
+                        .filter(function(d2) { 
+                            return d2.label === d.label; 
+                        })
+                        .select('text')
+                        .style('fill', 'darkOrange');
+
+                })
+                .on("mouseout", (d) => {
+                    that.removeMemberInstanceDisplay(d.label);
+
+                    d3.selectAll(".group_color_legend")
+                        .filter(function(d2) { 
+                            return d2.label === d.label; 
+                        })
+                        .select('text')
+                        .style('fill', 'black');
+
+                })
+                .on("click", (d) => {
+                    that.selectSubclassConcepts(d.label);
+                });
 
         legendEnter.append('circle')
             .attr('cx', 0)
@@ -915,6 +945,74 @@ class ConceptMap{
             .text((d) => {
                 return d.label;
             })
+    }
+
+    selectSubclassConcepts(groupName){
+        let groupIndex = GROUP_LABELS.indexOf(groupName);
+        let subclassConcepts = GROUPS[groupIndex];
+        let nodesToSelect = [];
+        for(let key in this.nodes._data){
+            let node = this.nodes._data[key];
+            let label = node.label;
+            if(subclassConcepts.indexOf(label) !== -1){
+                nodesToSelect.push(node.id);
+            }   
+        }
+        this.network.selectNodes(nodesToSelect);
+        this.removeMemberInstanceDisplay();
+    }
+
+    removeMemberInstanceDisplay(){
+        d3.select("#tooltip_groupMemberInstances").remove();
+    }
+
+    showMemberInstancesDisplay(groupName){
+        let groupIndex = GROUP_LABELS.indexOf(groupName);
+        let subclassConcepts = GROUPS[groupIndex];
+
+        // Get container
+        this.container = document.getElementById(this.cmapContainerID);
+        let tooltip_width = this.container.clientWidth / 2.96;
+        let tooltip_height = this.container.clientHeight / 7.61;
+        let font_size = tooltip_width / 40.64;
+
+        if(groupName === "measurements" || groupName === "instruments" || groupName === "orbits"){
+            tooltip_width = this.container.clientWidth / 3.2;
+            tooltip_height = this.container.clientHeight / 7.21;
+        }else{
+            tooltip_width = this.container.clientWidth / 6.16;
+            tooltip_height = this.container.clientHeight / 9.31;
+        }
+
+        let mouseLoc_x = d3.mouse(d3.select("#"+this.cmapContainerID).node())[0];
+        let mouseLoc_y = d3.mouse(d3.select("#"+this.cmapContainerID).node())[1];
+        let tooltip_location = {x:  mouseLoc_x + 40, 
+                                y:  mouseLoc_y - 20 -  tooltip_height};
+
+        let tooltipContainer = d3.select("#" + this.cmapContainerID)
+            .append('div')
+            .attr('id', 'tooltip_groupMemberInstances')
+            .style('left', tooltip_location.x + 'px')
+            .style('top', tooltip_location.y +'px')
+            .style('position', 'absolute');
+
+        let tooltipContainerDiv = tooltipContainer.append("div")
+            .style("width", tooltip_width + "px")
+            .style("height", tooltip_height + "px")
+            .style("background-color","#D0D0D0")
+            .style("padding", (tooltip_height / 9) + "px");
+
+        tooltipContainerDiv
+            .append("p")
+            .text("[Member concepts]")
+            .style("font-size",font_size + "px");
+
+        tooltipContainerDiv
+            .append("p")
+            .text(()=> {
+                return subclassConcepts.join(" | ");
+            })
+            .style("font-size",font_size + "px");
     }
 }
 
