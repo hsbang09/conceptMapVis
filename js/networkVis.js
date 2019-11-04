@@ -1014,6 +1014,24 @@ class ConceptMap{
             })
             .style("font-size",font_size + "px");
     }
+
+
+    removeNodeByLabel(label){
+        let nodes = this.nodes._data;
+        let keys = Object.keys(nodes);
+        let nodeIDtoRemove = null;
+        for(let i = 0; i < keys.length; i++){
+            let key = keys[i];
+            let node = nodes[key]
+            if(node.label === label){
+                nodeIDtoRemove = key;
+                break;
+            }
+        }
+        if(nodeIDtoRemove){
+            this.nodes.remove(nodeIDtoRemove);
+        }
+    }
 }
 
 function objectToArray(obj) {

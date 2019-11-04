@@ -32,7 +32,6 @@ class Experiment{
         } 
 
         this.experimentLogData = {};
-
         this.loadTextInputPanel();
     }
 
@@ -143,7 +142,7 @@ class Experiment{
         if(this.stage === "prior_knowledge_task"){
 
             title = "Copy and paste the participant ID";
-            message = "(provided in the top-right corner of the tutorial page)";
+            message = "(provided in the previous page)";
 
             submitCallback = function (instance, toast, button, event, inputs) {
                 let inputParticipantID = inputs[0].value;
@@ -371,6 +370,57 @@ class Experiment{
         }
     }
 
+    saveNetwork2(filename){
+        let that = this;
+
+        let out = {};
+
+        let edgesOut = [];
+        this.conceptMap.newEdges.forEach((d) => {
+            let edgeCopy = JSON.parse(JSON.stringify(d));
+            let fromNodeLabel = that.conceptMap.getNodeLabel(d.from);
+            let toNodeLabel = that.conceptMap.getNodeLabel(d.to);
+            edgeCopy.fromLabel = fromNodeLabel;
+            edgeCopy.toLabel = toNodeLabel;
+            edgeCopy.width = undefined;
+            edgeCopy.color = undefined;
+            edgesOut.push(edgeCopy);
+        })
+        out.edges = edgesOut;
+
+        let nodesOut = [];
+        this.conceptMap.newNodes.forEach((d) => {
+            let nodeCopy = JSON.parse(JSON.stringify(d));
+            nodeCopy.connectedNodes = [];
+
+            that.conceptMap.edges.forEach((d) => {
+                let connectedNode = null;
+                if(d.from === nodeCopy.id){
+                    connectedNode = that.conceptMap.nodes.get(d.to);
+                }else if( d.to === nodeCopy.id){
+                    connectedNode = that.conceptMap.nodes.get(d.from);
+                }
+                if(connectedNode){
+                    let connectedNodeCopy = JSON.parse(JSON.stringify(connectedNode));
+                    connectedNodeCopy.group = undefined;
+                    nodeCopy.connectedNodes.push(connectedNodeCopy);
+                }
+            })
+            nodesOut.push(nodeCopy);
+        })
+        out.nodes = nodesOut;
+
+        // Save the text box input
+        if(d3.select("#textInputBox").node()){
+            out.textInput = d3.select("#textInputBox").node().value;
+        } else {
+            out.textInput = "";
+        }
+        
+        filename = filename + ".json";
+        this.saveTextAsFile2(filename, JSON.stringify(out));
+    }
+
     saveNetwork(){
         let that = this;
 
@@ -551,9 +601,9 @@ class Experiment{
         }
         
         let filename;
-        if(stage === "prior_knowledge_task"){
+        if(stage === "prior"){
             filename = participantID + "-conceptMap-prior_knowledge_task.json";
-        } else if(stage === "learning_task"){
+        } else if(stage === "learning"){
             filename = participantID + "-conceptMap-learning_task.json";
         }
         let filePathArray = ['data', 'experimentSaveData', participantID, filename];
@@ -562,11 +612,28 @@ class Experiment{
     }
 
     importUserGeneratedNetwork(filename){
+
+        // Remove any info from the previous stage
+        let removeUserGeneratedInfo = (conceptMap) => {
+            // remove all newly added edges and nodes
+            let edgesToRemove = conceptMap.newEdges.clear();
+            conceptMap.edges.remove(edgesToRemove);
+            let nodesToRemove = conceptMap.newNodes.clear();
+            conceptMap.nodes.remove(nodesToRemove);
+            d3.select("#textInputBox").node().value = "";
+        }
+        removeUserGeneratedInfo(this.conceptMap);
+
         let that = this;
         $.getJSON(filename, (d) => {
             let userGeneratedEdges = d.edges;
             let userGeneratedNodes = d.nodes;
-
+            let userGeneratedTextInput = null;
+            if(d.textInput){
+                userGeneratedTextInput = d.textInput;
+                d3.select("#textInputBox").node().value = userGeneratedTextInput;
+            }
+            
             that.conceptMap.nodes.add(userGeneratedNodes);
             that.conceptMap.newNodes.add(userGeneratedNodes);
 
