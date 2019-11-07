@@ -62,11 +62,11 @@ class Tutorial{
         } else if(stage === "problem_solving_task"){
             stageContent = this.getContentsHavingKeyword(TUTORIAL_CONTENT, "problem_solving_task");
 
-            if(this.experiment.treatmentConditionName === "design_inspection"){
-                stageContent = this.filterContentByKeyword(stageContent, "problem_solving_task_v1");
-            } else {
-                stageContent = this.filterContentByKeyword(stageContent, "problem_solving_task_v2");
-            }
+            // if(this.experiment.treatmentConditionName === "design_inspection"){
+            //     stageContent = this.filterContentByKeyword(stageContent, "problem_solving_task_v1");
+            // } else {
+            //     stageContent = this.filterContentByKeyword(stageContent, "problem_solving_task_v2");
+            // }
         }
 
         // Update the target object
@@ -180,9 +180,9 @@ class Tutorial{
                     if(stage === "prior_knowledge_task"){
                         return "START TASK";
                     }else if(stage === "learning_task"){
-                        return "START TASK";
+                        return "CONTINUE";
                     }else if(stage === "problem_solving_task"){
-                        return "DONE";
+                        return "CONTINUE";
                     }else{
                         return "DONE"
                     }

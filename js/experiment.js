@@ -141,8 +141,8 @@ class Experiment{
         let title, message, submitCallback;
         if(this.stage === "prior_knowledge_task"){
 
-            title = "Copy and paste the participant ID";
-            message = "(provided in the previous page)";
+            title = "Copy and paste the participant ID from the prvious page";
+            message = "(go back to iFEED Web Application tab to copy the participant ID)";
 
             submitCallback = function (instance, toast, button, event, inputs) {
                 let inputParticipantID = inputs[0].value;
@@ -193,24 +193,38 @@ class Experiment{
                     that.loadStage();
 
                 }else{
-                    that.generateErrorMessage("Invalid participant ID. Please copy and paste the particpant ID from the tutorial page");
+                    that.generateErrorMessage("Invalid participant ID. Please copy and paste the particpant ID from iFEED Web Application page");
                 }
             }
+        } else if (this.stage === "learning_task"){
+            // title = "Go back to iFEED Web Application tab, and click the button \"LOAD DATA ANALYSIS TASK\". When it asks for a passcode, type in \"ltst\" in the textbox.";
+            // message = "(later when prompted to continue on this page, type in a passcode provided from iFEED Web Application tab here)";
+
+            // submitCallback = function (instance, toast, button, event, inputs) {
+            //     let input = inputs[0].value;
+            //     if(input === "ifde"){
+            //         instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+            //         that.loadStage();
+
+            //     }else{
+            //         that.generateErrorMessage("Invalid passcode: use the passcode provided in iFEED Web Application tab to continue.");
+            //     }
+            // }
 
         } else {
-            title = "To continue, type in a passcode";
-            message = "(Please ask the experimenter to provide the passcode)";
+            // title = "To continue, type in a passcode";
+            // message = "(Please ask the experimenter to provide the passcode)";
 
-            submitCallback = function (instance, toast, button, event, inputs) {
-                let input = inputs[0].value;
-                if(input === "ifde"){
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                    that.loadStage();
+            // submitCallback = function (instance, toast, button, event, inputs) {
+            //     let input = inputs[0].value;
+            //     if(input === "ifde"){
+            //         instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+            //         that.loadStage();
 
-                }else{
-                    that.generateErrorMessage("Invalid passcode");
-                }
-            }
+            //     }else{
+            //         that.generateErrorMessage("Invalid passcode");
+            //     }
+            // }
         }
 
         iziToast.question({
@@ -250,7 +264,11 @@ class Experiment{
             this.stage = "problem_solving_task";
         }
 
-        this.generateSignInMessage();
+        if(this.stage === "prior_knowledge_task"){
+            this.generateSignInMessage();
+        }else{
+            this.loadStage();
+        }
     }
     
     startStage(){
@@ -299,7 +317,7 @@ class Experiment{
 
         }else if(this.stage === "learning_task"){
             timeLimitExists = false;
-            startMessage = "<p>Record as many relations as possible based on the observations you make as you analyze the data "
+            startMessage = "<p>This time, record as many relations as possible based on the observations you make as you analyze the data "
                         +"(instead of relying on your prior knowledge). </p>"
                         +"<p>You can record information by: </p>"
                         +"<ol><li>Adding new relations</li>"

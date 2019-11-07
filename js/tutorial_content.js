@@ -412,27 +412,45 @@ function loadTutorialContent(){
     	{
             name: "learning_task",
             object: undefined, 
-            content: "<p>Try to record as many positive or negative relations as possible "
-                    +"based on the observations you make from the data provided in the iFEED interface "
-                    +"(instead of relying on your prior knowledge).</p>",
-            onChangeCallback: null,
-            onExitCallback: null,
-    	},
-    	{
-            name: "problem_solving_task_v1",
-            object: undefined, 
-            content: "<p>As you answer the questions, you may refer to the information you recorded in the concept map.</p>"
-            	+"<p>Note that you are not allowed to make any changes to the concept map during this part of the experiment. </p>",
+            content: "<p>Now, you are ready to start the data analysis task."
+                    +" Go back to iFEED Web Application tab, and click the button <b>\"LOAD DATA ANALYSIS TASK\"</b>.</p>"
+                    +"<p>When it asks for a passcode, type in <b>\"ltst\"</b> in the textbox.</p>"
+                    +"<p>You can click the continue button below and start recording new information based on what"
+                    +" you can observe from the data.</p>",
             onChangeCallback: null,
             onExitCallback: null,
     	},
         {
-            name: "problem_solving_task_v2",
+            name: "problem_solving_task_0",
             object: undefined, 
-            content: "<p>You may refer to the information in the concept map interface as you analyze the dataset. </p>"
-                +"<p>Note that you are not allowed to make any changes to the concept map during this part of the experiment. </p>",
+            content: "<p>Now you will solve the problem set. Type the passcode <b>\"ldne\"</b> on Qualtrics survey page to continue.</p>",
             onChangeCallback: null,
             onExitCallback: null,
         },
+        {
+            name: "problem_solving_task_1",
+            object: undefined, 
+            content: "<p>As you solve the problem set, you may refer to the information you recorded in the concept map.</p>"
+                +"<p>Note that you are not allowed to make any changes to the concept map during this part of the experiment. </p>"
+                +"<p>Click the continue button below to remove this message.</p>",
+            onChangeCallback: null,
+            onExitCallback: null,
+        },
+    	// {
+     //        name: "problem_solving_task_v1",
+     //        object: undefined, 
+     //        content: "<p>As you answer the questions, you may refer to the information you recorded in the concept map.</p>"
+     //        	+"<p>Note that you are not allowed to make any changes to the concept map during this part of the experiment. </p>",
+     //        onChangeCallback: null,
+     //        onExitCallback: null,
+    	// },
+     //    {
+     //        name: "problem_solving_task_v2",
+     //        object: undefined, 
+     //        content: "<p>You may refer to the information in the concept map interface as you analyze the dataset. </p>"
+     //            +"<p>Note that you are not allowed to make any changes to the concept map during this part of the experiment. </p>",
+     //        onChangeCallback: null,
+     //        onExitCallback: null,
+     //    },
     ];
 }
